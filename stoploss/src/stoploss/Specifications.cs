@@ -34,6 +34,32 @@
 	}
 
 	[TestFixture]
+	public class When_a_trailing_position_is_taken : Specification
+	{
+		private Guid positionId;
+
+		protected override IEnumerable<Message> Given()
+		{
+			positionId = Guid.NewGuid();
+			yield return new PositionAcquiredMessage { Price = 10.0, PositionId = positionId, StopLoss = 1.0 };
+			var priceChangedMessage = new PriceChangedMessage {Price = 11.0};
+			yield return priceChangedMessage;
+			yield return new Elapsed15Sec{ChangeId = priceChangedMessage.Id};
+			yield return new PriceChangedMessage { Price = 10.0 };
+
+		}
+
+		
+		[Test]
+		public void Zero_message_produced()
+		{
+			Then.CountIs(0);
+		}
+
+	}
+
+
+	[TestFixture]
 	public class When_a_position_is_taken: Specification
 	{
 		private Guid positionId;
