@@ -11,7 +11,7 @@
 		private Guid positionId;
 		private double stopAt;
 		private double stopLoss;
-		private IList<PriceChangedMessage> PriceChanges=new List<PriceChangedMessage>();
+		private readonly IList<PriceChangedMessage> priceChanges=new List<PriceChangedMessage>();
 
 		public IEnumerable<Message> ProducedMessages
 		{
@@ -26,7 +26,7 @@
 
 		public void Consume(Elapsed15Sec message)
 		{
-			var priceChangedMessage = PriceChanges.FirstOrDefault(x => x.Id == message.ChangeId);
+			var priceChangedMessage = priceChanges.FirstOrDefault(x => x.Id == message.ChangeId);
 			if (priceChangedMessage != null)
 			{
 				var at = priceChangedMessage.Price - stopLoss;
@@ -54,7 +54,7 @@
 
 		public void Consume(PriceChangedMessage message)
 		{
-			this.PriceChanges.Add(message);
+			this.priceChanges.Add(message);
 			this.Publish(new WaitMessage<Elapsed15Sec>(new Elapsed15Sec {ChangeId = message.Id}, 15));
 		}
 
