@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("stoploss.tests")]
+[assembly: AssemblyTitle("JustOne")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("stoploss.tests")]
+[assembly: AssemblyProduct("JustOne")]
 [assembly: AssemblyCopyright("Copyright ©  2013")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("0cf4d9f6-cdfe-464a-913b-8f967da56f42")]
+[assembly: Guid("61e93043-f52a-4559-b51f-a6525cf3ed74")]
 
 // Version information for an assembly consists of the following four values:
 //

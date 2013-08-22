@@ -5,9 +5,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "stoploss-kata", "stoploss\s
 EndProject
 Project("{1F9597DD-BEAF-4316-BF99-CBA44153BBAD}") = "stoploss-projections", "stoploss-projections\stoploss-projections.espproj", "{86669315-3D2D-48AE-B10C-AAF789B358DD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "stoploss.tests", "stoploss.tests\stoploss.tests.csproj", "{29021123-6100-4FF9-827A-16AA1C7EF228}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tutorials", "tutorials\tutorials.csproj", "{B90F6DEA-4C75-49A2-BC53-D73AA1A80C06}"
+	ProjectSection(ProjectDependencies) = postProject
+		{AF9DFC85-4D40-444E-B499-53CF523E2004} = {AF9DFC85-4D40-444E-B499-53CF523E2004}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JustOne", "JustOne\JustOne.csproj", "{AF9DFC85-4D40-444E-B499-53CF523E2004}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -29,18 +32,18 @@ Global
 		{86669315-3D2D-48AE-B10C-AAF789B358DD}.Release|Any CPU.ActiveCfg = Release|x86
 		{86669315-3D2D-48AE-B10C-AAF789B358DD}.Release|x86.ActiveCfg = Release|x86
 		{86669315-3D2D-48AE-B10C-AAF789B358DD}.Release|x86.Build.0 = Release|x86
-		{29021123-6100-4FF9-827A-16AA1C7EF228}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{29021123-6100-4FF9-827A-16AA1C7EF228}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{29021123-6100-4FF9-827A-16AA1C7EF228}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{29021123-6100-4FF9-827A-16AA1C7EF228}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{29021123-6100-4FF9-827A-16AA1C7EF228}.Release|Any CPU.Build.0 = Release|Any CPU
-		{29021123-6100-4FF9-827A-16AA1C7EF228}.Release|x86.ActiveCfg = Release|Any CPU
 		{B90F6DEA-4C75-49A2-BC53-D73AA1A80C06}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{B90F6DEA-4C75-49A2-BC53-D73AA1A80C06}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B90F6DEA-4C75-49A2-BC53-D73AA1A80C06}.Debug|x86.ActiveCfg = Debug|Any CPU
 		{B90F6DEA-4C75-49A2-BC53-D73AA1A80C06}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B90F6DEA-4C75-49A2-BC53-D73AA1A80C06}.Release|Any CPU.Build.0 = Release|Any CPU
 		{B90F6DEA-4C75-49A2-BC53-D73AA1A80C06}.Release|x86.ActiveCfg = Release|Any CPU
+		{AF9DFC85-4D40-444E-B499-53CF523E2004}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AF9DFC85-4D40-444E-B499-53CF523E2004}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AF9DFC85-4D40-444E-B499-53CF523E2004}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{AF9DFC85-4D40-444E-B499-53CF523E2004}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AF9DFC85-4D40-444E-B499-53CF523E2004}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AF9DFC85-4D40-444E-B499-53CF523E2004}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
