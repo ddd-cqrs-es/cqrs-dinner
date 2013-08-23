@@ -220,7 +220,31 @@
 
             }
         }
+
+	    [Test]
+	    public void Open_a_club()
+	    {
+		    for (int i = 1; i <= 5; i++)
+		    {
+			    new Thread(TheEnVy.Enter).Start(i);
+		    }
+	    }
     }
+
+	public class TheEnVy
+	{
+		static SemaphoreSlim semaphore = new SemaphoreSlim(3);
+
+		public static void Enter(object id)
+		{
+			Console.WriteLine(id + " wants to enter");
+			semaphore.Wait(); //wait is the gateway if count is less then three you're in
+			Console.WriteLine(id + " is in!");
+			Thread.Sleep(1000 * (int) id);
+			Console.WriteLine(id + " is leaving");
+			semaphore.Release();
+		}
+	}
 
     public class DeadLock
     {
