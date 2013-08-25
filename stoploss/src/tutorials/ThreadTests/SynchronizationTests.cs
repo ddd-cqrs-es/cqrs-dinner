@@ -308,6 +308,26 @@
 		    }
 	    }
 
+		static CountdownEvent countdown = new CountdownEvent(3);
+	    [Test]
+	    public void Countdown_event()
+	    {
+		    new Thread(SaySomething).Start("I am thread 1");
+			new Thread(SaySomething).Start("I am thread 2");
+			new Thread(SaySomething).Start("I am thread 3");
+
+		    countdown.Wait(); //blocks unitil signaled three times
+			Console.WriteLine("All threads have finished speaking!");
+
+	    }
+
+		[Test]
+	    private void SaySomething(object thingy)
+	    {
+		    Thread.Sleep(1000);
+			Console.WriteLine(thingy);
+		    countdown.Signal();
+	    }
     }
 
 	public class ProducerConsumerQueue: IDisposable
