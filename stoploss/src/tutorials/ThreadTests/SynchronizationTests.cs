@@ -309,6 +309,7 @@
 	    }
 
 		static CountdownEvent countdown = new CountdownEvent(3);
+	    
 	    [Test]
 	    public void Countdown_event()
 	    {
@@ -321,12 +322,32 @@
 
 	    }
 
-		[Test]
 	    private void SaySomething(object thingy)
 	    {
 		    Thread.Sleep(1000);
 			Console.WriteLine(thingy);
 		    countdown.Signal();
+	    }
+
+
+		private static readonly ManualResetEvent starter= new ManualResetEvent(false);
+	    [Test]
+	    public void Thread_pool_wait_handle()
+	    {
+		    var reg = ThreadPool.RegisterWaitForSingleObject(starter, GoThreadPool, "Some Data", -1, true);
+	    
+			Thread.Sleep(1000);
+			Console.WriteLine("Signaling worker");
+		    starter.Set();
+
+		    reg.Unregister(starter);
+
+	    }
+
+	    private void GoThreadPool(object data, bool timedout)
+	    {
+			Console.WriteLine("Started - " + data);
+			//Do something usefull
 	    }
     }
 
