@@ -229,7 +229,148 @@
 			    new Thread(TheEnVy.Enter).Start(i);
 		    }
 	    }
+
+
+		static readonly EventWaitHandle waitHandle = new AutoResetEvent(false);
+	    [Test]
+	    public void Turnstyle_test()
+	    {
+		    new Thread(() => {
+				Console.Write("Waiting...");
+				waitHandle.WaitOne(); 
+				Console.WriteLine("Notified");
+		    }).Start();
+
+			Thread.Sleep(1000);
+		    waitHandle.Set(); //Ticket in, opens the turnstyle
+			Thread.Sleep(10);
+			//check if ticket was used
+			
+	    }
+
+		static readonly EventWaitHandle _ready = new AutoResetEvent(false);
+		static EventWaitHandle _go = new AutoResetEvent(false);
+	    private static readonly object _locker = new object();
+	    private string _message;
+
+	    [Test]
+	    public void Two_way_signals()
+	    {
+		    new Thread(() =>
+		    {
+			    while (true)
+			    {
+
+
+				    _ready.Set(); //Signal we are ready
+				    _go.WaitOne(); //Wait to be kicked off
+				    lock (_locker)
+				    {
+					    if (_message == null)
+					    {
+						    return;
+					    } //gracefully exit
+					    Console.WriteLine(_message);
+				    }
+			    }
+		    }).Start();
+
+		    _ready.WaitOne(); //Wait for the signal
+		    lock (_locker) _message = "ooo";
+		    _go.Set(); // signal to kick off
+		    _ready.WaitOne(); //Wait for the signal
+		    lock (_locker)
+		    {
+			    _message = "ahhhh";
+		    }
+		    _go.Set();
+
+		    _ready.WaitOne();
+
+		    lock (_locker)
+		    {
+			    _message = null;
+		    }
+		    _go.Set();
+	    }
+
+		[Test]
+	    public void Producer_consumer_test()
+	    {
+		    using (var q= new ProducerConsumerQueue())
+		    {
+			    q.EnqueueTask("Hello");
+			    for (int i = 0; i < 100; i++)
+			    {
+				    q.EnqueueTask("Say " + i);
+			    }
+				q.EnqueueTask("Good bye!");
+		    }
+	    }
+
     }
+
+	public class ProducerConsumerQueue: IDisposable
+	{
+		EventWaitHandle waitHandle= new AutoResetEvent(false);
+		private Thread worker;
+		object locker = new object();
+		Queue<string> tasks = new Queue<string>();
+
+		public ProducerConsumerQueue()
+		{
+			worker=new Thread(Work);
+			worker.Start();
+		}
+
+		public void EnqueueTask(string task)
+		{
+			lock(locker) tasks.Enqueue(task);
+			waitHandle.Set(); //Signal that there is work to do
+
+		}
+
+
+		private void Work()
+		{
+			while (true)
+			{
+				string task = null;
+				lock (locker)
+				{
+					if (tasks.Count > 0)
+					{
+						task = tasks.Dequeue();
+						if (task == null)
+						{
+							return;
+						}
+
+						
+					}
+				}
+
+				if (task != null)
+				{
+					Console.WriteLine("Performing task: " + task);
+					Thread.Sleep(1000);
+				}
+				else
+				{
+					waitHandle.WaitOne(); 
+				}
+			}
+		}
+
+
+
+		public void Dispose()
+		{
+			EnqueueTask(null); //Signal consumer to exit
+			worker.Join(); //Wait for cunsumer to finish
+			waitHandle.Close();
+		}
+	}
 
 	public class TheEnVy
 	{
