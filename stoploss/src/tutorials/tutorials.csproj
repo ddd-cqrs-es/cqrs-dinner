@@ -52,6 +52,7 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="ThreadTests\EventBasedAsyncTests.cs" />
+    <Compile Include="ThreadTests\InterruptAbortSample.cs" />
     <Compile Include="ThreadTests\SynchronizationTests.cs" />
     <Compile Include="ThreadTests\ThreadTest.cs" />
   </ItemGroup>
