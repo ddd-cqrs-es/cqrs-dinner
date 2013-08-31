@@ -55,7 +55,7 @@
 			t.Start();
 			t.Interrupt();
 			t.Join();
-			Assert.That(threadInterrupted, Iz.False);
+			Assert.That(threadInterrupted, Is.False);
 		}
 
 		[Test]
@@ -87,8 +87,82 @@
 			t.Start();
 			t.Interrupt();
 			t.Join();
-			Assert.That(threadInterrupted, Iz.True);
+			Assert.That(threadInterrupted, Is.True);
 			Assert.That(counter, Is.EqualTo(999));
 		}
+
+		[Test]
+		public void Thread_abort()
+		{
+			Exception abortedException = null;
+			var t = new Thread(() =>
+			{
+				try
+				{
+					Thread.Sleep(Timeout.Infinite);
+				}
+				catch (ThreadAbortException e)
+				{
+					abortedException = e;
+					Console.Write("Aborting...");
+
+				}
+				Console.WriteLine("Woken!");
+			});
+			t.IsBackground = true; //dont crash the process!
+			t.Start();
+			Thread.Sleep(10);
+			t.Abort();
+
+			while (t.ThreadState != ThreadState.Aborted)
+			{
+				
+			}
+			
+			Assert.That(abortedException, Is.Not.Null);
+
+			
+		}
+
+
+		[Test]
+		public void Thread_abort_reset()
+		{
+			Exception abortedException = null;
+			bool reset = false;
+			var t = new Thread(() =>
+			{
+				try
+				{
+					Thread.Sleep(Timeout.Infinite);
+				}
+				catch (ThreadAbortException e)
+				{
+					abortedException = e;
+					Thread.ResetAbort();
+					Console.Write("Reseting...");
+
+				}
+
+				reset = true;
+				Console.WriteLine("Woken!");
+			});
+			t.IsBackground = true; //dont crash the process!
+			t.Start();
+			Thread.Sleep(10);
+			t.Abort();
+
+			while (t.ThreadState == ThreadState.AbortRequested)
+			{
+
+			}
+
+			Assert.That(abortedException, Is.Not.Null);
+			Assert.That(reset, Is.True);
+
+
+		}
+
+
 	}
 }
