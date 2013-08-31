@@ -99,7 +99,17 @@
 		public void Background_worker_subclass_does_EAP()
 		{
 			var financialWorker = new FinancialWorker(10, 20);
-			financialWorker.ProgressChanged =
+
+			financialWorker.ProgressChanged+= (sender, args) => Console.WriteLine("Progress: " +args.ProgressPercentage);
+			financialWorker.RunWorkerCompleted += (sender, args) => Console.WriteLine("Completed: " + args.Result);
+
+			financialWorker.RunWorkerAsync();
+
+			while (financialWorker.IsBusy)
+			{
+				Thread.Sleep(10); //wait for worker completed finished
+			}
+
 		}
 	}
 
