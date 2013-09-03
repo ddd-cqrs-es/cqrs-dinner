@@ -53,7 +53,10 @@
     </Compile>
     <Compile Include="ThreadTests\EventBasedAsyncTests.cs" />
     <Compile Include="ThreadTests\InterruptAbortSample.cs" />
+    <Compile Include="ThreadTests\LazySample.cs" />
     <Compile Include="ThreadTests\SynchronizationTests.cs" />
+    <Compile Include="ThreadTests\ThreadCancellationSample.cs" />
+    <Compile Include="ThreadTests\ThreadLocalStorageSample.cs" />
     <Compile Include="ThreadTests\ThreadTest.cs" />
   </ItemGroup>
   <ItemGroup>
