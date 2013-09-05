@@ -12,6 +12,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tutorials", "tutorials\tuto
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JustOne", "JustOne\JustOne.csproj", "{AF9DFC85-4D40-444E-B499-53CF523E2004}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SagaConsole", "SagaConsole\SagaConsole.csproj", "{9219C55B-B5EF-45E2-8F9B-F7ABBCBD7DD8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -44,6 +46,12 @@ Global
 		{AF9DFC85-4D40-444E-B499-53CF523E2004}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AF9DFC85-4D40-444E-B499-53CF523E2004}.Release|Any CPU.Build.0 = Release|Any CPU
 		{AF9DFC85-4D40-444E-B499-53CF523E2004}.Release|x86.ActiveCfg = Release|Any CPU
+		{9219C55B-B5EF-45E2-8F9B-F7ABBCBD7DD8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9219C55B-B5EF-45E2-8F9B-F7ABBCBD7DD8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9219C55B-B5EF-45E2-8F9B-F7ABBCBD7DD8}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{9219C55B-B5EF-45E2-8F9B-F7ABBCBD7DD8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9219C55B-B5EF-45E2-8F9B-F7ABBCBD7DD8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9219C55B-B5EF-45E2-8F9B-F7ABBCBD7DD8}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
