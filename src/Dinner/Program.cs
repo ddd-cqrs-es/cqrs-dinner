@@ -13,30 +13,36 @@ namespace ConsoleApplication1
 	class Program
     {
 
-		static  System.Collections.Concurrent.ConcurrentBag<int> orders = new ConcurrentBag<int>();
+		static  ConcurrentDictionary<int, object> orders = new ConcurrentDictionary<int, object>();
 
 		static void Main(string[] args)
-        {
+		{
+			var d = new Dispatcher();
             var manager = new Manager();
-            var cashier = new Cashier(manager);
-            var ass = new AssMan(cashier);
+            var cashier = new Cashier(d);
+            var ass = new AssMan(d);
 
-			var cookDispatche = new SmartDispatcher<Order>();
-			var cookTTLGate = new TimeToLiveGate<Order>(cookDispatche);
+			var cookDispatcher = new SmartDispatcher<Order>();
+			var cookTTLGate = new TimeToLiveGate<Order>(cookDispatcher);
 			var cookQueudHandler = new QueuedHandler<Order>(cookTTLGate, "dispatcher");
 			var cookLimiter = new Limiter<Order>(cookQueudHandler);
 			
-			var cookQueudHandler1 = new QueuedHandler<Order>(new Cook(ass, 10000), "c1");
-			cookDispatche.AddHandler(cookQueudHandler1);
-			var cookQueudHandler2 = new QueuedHandler<Order>(new Cook(ass, 1000), "c2");
-			cookDispatche.AddHandler(cookQueudHandler2);
-			var cookQueudHandler3 = new QueuedHandler<Order>(new Cook(ass, 100), "c3");	
-			cookDispatche.AddHandler(cookQueudHandler3);
+			d.Subscribe(cookLimiter, "order-created");
+			d.Subscribe(ass, "order-ready");
+			d.Subscribe(cashier, "order-priced");
+			d.Subscribe(manager, "order-paid");
+
+			var cookQueudHandler1 = new QueuedHandler<Order>(new Cook(d, 10000), "c1");
+			cookDispatcher.AddHandler(cookQueudHandler1);
+			var cookQueudHandler2 = new QueuedHandler<Order>(new Cook(d, 1000), "c2");
+			cookDispatcher.AddHandler(cookQueudHandler2);
+			var cookQueudHandler3 = new QueuedHandler<Order>(new Cook(d, 100), "c3");	
+			cookDispatcher.AddHandler(cookQueudHandler3);
 
 			var monitor = new Monitor<Order>(new[] {cookQueudHandler1, cookQueudHandler2, cookQueudHandler3, cookQueudHandler});
 		
             //Cook cook = new Cook(ass);
-            var waiter = new Waiter(cookLimiter);
+            var waiter = new Waiter(d);
 
 			cookQueudHandler1.Start();
 			cookQueudHandler2.Start();
@@ -48,7 +54,7 @@ namespace ConsoleApplication1
             for (int i = 0; i < 100000; i++)
             {
                 var orderNumber = waiter.PlaceOrder(new[] { Tuple.Create("Burger", 1) }, 15);
-                orders.Add(orderNumber);
+                orders.TryAdd(orderNumber, null);
 		    }
             //var orderNumber = waiter.PlaceOrder(new[] {Tuple.Create("Burger", 1)}, 15);
             //cashier.PayForOrder(orderNumber);
@@ -65,7 +71,9 @@ namespace ConsoleApplication1
 				{
 					try
 					{
-						cashier.PayForOrder(order);
+						cashier.PayForOrder(order.Key);
+						object val;
+						orders.TryRemove(order.Key,out val);
 					}
 					catch
 					{

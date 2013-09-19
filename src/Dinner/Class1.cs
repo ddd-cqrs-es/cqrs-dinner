@@ -114,7 +114,7 @@ namespace DocumentProblem
 		}
 	}
 
-	public class Dipatcher
+	public class Dispatcher
 	{
 		private readonly Dictionary<string, Multiplexer<IMessage>> topics = new Dictionary<string, Multiplexer<IMessage>>(); 
 		 
@@ -205,15 +205,21 @@ namespace DocumentProblem
 
 		public void Start()
 		{
-			CancellationToken cancellationToken = new CancellationToken();
-			var task = Task.Factory.StartNew(() =>
+			var t = new Thread(Run);
+			t.Start();
+		}
+
+		private void Run()
+		{
+			while (!canceled)
+			{
+				T message;
+				queuedMessages.TryDequeue(out message);
+				if (message != null)
 				{
-					while (!canceled)
-					{
-						T message;
-						if (queuedMessages.Any() && queuedMessages.TryDequeue(out message)) handler.Handle(message);
-					}
-				}, cancellationToken);
+					handler.Handle(message);
+				}
+			}
 		}
 
 		private void PrintEverySecond()
@@ -259,7 +265,7 @@ namespace DocumentProblem
 
 		private bool IsExpired(T message)
 		{
-			return message.TTL > DateTime.Now;
+			return message.TTL < DateTime.Now;
 		}
 	}
 
@@ -309,7 +315,7 @@ namespace DocumentProblem
 		{
 			if (handler.Count() > 10000)
 			{
-				Console.WriteLine("Limiting");
+				Console.Write(".");
 				Thread.Sleep(1);
 			}
 			handler.Handle(message);
@@ -346,13 +352,12 @@ namespace DocumentProblem
 
 	public class Waiter
 	{
+		private readonly Dispatcher dispatcher;
 		private int lastOrderNumber;
-		private IHandle<Order> handlesOrder;
 
-		public Waiter(IHandle<Order> handlesOrder)
+		public Waiter(Dispatcher dispatcher)
 		{
-
-			this.handlesOrder = handlesOrder;
+			this.dispatcher = dispatcher;
 		}
 
 		public int PlaceOrder(IEnumerable<Tuple<string, int>> items, int tableNumber)
@@ -361,9 +366,9 @@ namespace DocumentProblem
 			order.OrderNumber = ++lastOrderNumber;
 			order.TableNumber = tableNumber;
 			order.Created = DateTime.Now;
-			order.TTL = order.Created.AddSeconds(3);
+			order.TTL = order.Created.AddSeconds(1000);
 			foreach (var item in items) order.AddItem(item.Item1, item.Item2);
-			handlesOrder.Handle(order);
+			dispatcher.Publish("order-created", order);
 			return order.OrderNumber;
 		}
 	}
@@ -371,14 +376,14 @@ namespace DocumentProblem
 	public class Cook : IHandle<Order>
 	{
 		private Dictionary<string, List<string>> ingredientsByDishName = new Dictionary<string, List<string>>();
-		private IHandle<Order> handlesOrder;
+		private Dispatcher dispatcher;
 		private readonly int speed;
 
-		public Cook(IHandle<Order> handlesOrder, int speed)
+		public Cook(Dispatcher dispatcher, int speed)
 		{
 			ingredientsByDishName.Add("Burger", new List<string> {"Bun", "Meat"});
 
-			this.handlesOrder = handlesOrder;
+			this.dispatcher = dispatcher;
 			this.speed = speed;
 		}
 
@@ -393,7 +398,7 @@ namespace DocumentProblem
 			}
 
 			Thread.Sleep(speed);
-			handlesOrder.Handle(message);
+			dispatcher.Publish("order-ready",message);
 		}
 	}
 
@@ -401,11 +406,11 @@ namespace DocumentProblem
 	{
 		private decimal taxRate = 0.07m;
 		private Dictionary<string, decimal> pricesByDishName = new Dictionary<string, decimal>();
-		private IHandle<Order> handlesOrder;
+		private Dispatcher dispatcher;
 
-		public AssMan(IHandle<Order> handlesOrder)
+		public AssMan(Dispatcher dispatcher)
 		{
-			this.handlesOrder = handlesOrder;
+			this.dispatcher = dispatcher;
 			pricesByDishName.Add("Burger", 10);
 		}
 
@@ -416,24 +421,27 @@ namespace DocumentProblem
 				if (pricesByDishName.ContainsKey(item.Name)) item.Price = pricesByDishName[item.Name]*item.Qty;
 				else throw new Exception("I have no idea what the price is!!!!");
 
-				Console.WriteLine("Calculating price..");
+				
 			}
+
+			Console.WriteLine("Calculating price");
 
 			message.SubTotal = message.Items.Sum(i => i.Price);
 			message.Total = message.SubTotal + (message.SubTotal*taxRate);
 
-			handlesOrder.Handle(message);
+			dispatcher.Publish("order-priced", message);
 		}
 	}
 
 	public class Cashier : IHandle<Order>
 	{
+		private readonly Dispatcher dispatcher;
 		private Dictionary<int, Order> ordersAwaitingPaymentByOrderNumber = new Dictionary<int, Order>();
 		private IHandle<Order> handlesOrder;
 
-		public Cashier(IHandle<Order> handlesOrder)
+		public Cashier(Dispatcher dispatcher)
 		{
-			this.handlesOrder = handlesOrder;
+			this.dispatcher = dispatcher;
 		}
 
 		public void Handle(Order message)
@@ -447,7 +455,7 @@ namespace DocumentProblem
 			order.IsPaid = true;
 
 			Console.WriteLine("Paying for order " + orderNumber);
-			handlesOrder.Handle(order);
+			dispatcher.Publish("order-paid", order);
 		}
 	}
 
