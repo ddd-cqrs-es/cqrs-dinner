@@ -1,14 +1,14 @@
 ﻿namespace Dinner
 {
-	using Newtonsoft.Json.Linq;
-	using NUnit.Framework;
 	using System;
 	using System.Collections.Concurrent;
 	using System.Collections.Generic;
 	using System.IO;
 	using System.Linq;
 	using System.Threading;
-
+	using NUnit.Framework;
+	using Newtonsoft.Json;
+	using Newtonsoft.Json.Linq;
 
 	public class Multiplexer<T> : IHandle<T> where T : IMessage
 	{
@@ -30,7 +30,10 @@
 
 		public void Handle(T message)
 		{
-			foreach (var handler in messageHandlers) handler.Handle(message);
+			foreach (var handler in messageHandlers)
+			{
+				handler.Handle(message);
+			}
 		}
 	}
 
@@ -49,7 +52,7 @@
 		}
 	}
 
-	public class Monitor2: IHandle<IMessage>, IHandle<OrderPlaced>
+	public class Monitor2 : IHandle<IMessage>, IHandle<OrderPlaced>
 	{
 		private readonly Dispatcher d;
 
@@ -60,7 +63,7 @@
 
 		public void Handle(IMessage message)
 		{
-			Console.WriteLine("Id:{0} CaId:{1} CoId:{2} {3}", message.Id, message.CausationId, message.CorolationId, message.ToString());
+			Console.WriteLine("Id:{0} CaId:{1} CoId:{2} {3}", message.Id, message.CausationId, message.CorolationId, message);
 		}
 
 		public void Handle(OrderPlaced message)
@@ -74,7 +77,7 @@
 		}
 	}
 
-	public class Narrower<T, U> : IHandle<T>, IEquatable<Narrower<T, U>> where U: T
+	public class Narrower<T, U> : IHandle<T>, IEquatable<Narrower<T, U>> where U : T
 	{
 		public bool Equals(Narrower<T, U> other)
 		{
@@ -99,7 +102,7 @@
 			{
 				return true;
 			}
-			if (obj.GetType() != this.GetType())
+			if (obj.GetType() != GetType())
 			{
 				return false;
 			}
@@ -113,21 +116,22 @@
 
 		private readonly IHandle<U> handler;
 
-		public Narrower(IHandle<U> handler )
+		public Narrower(IHandle<U> handler)
 		{
 			this.handler = handler;
-		} 
+		}
+
 		public void Handle(T message)
 		{
 			handler.Handle((U) message);
 		}
 	}
 
-	public class Widener<T,U>: IHandle<T> where T:U
+	public class Widener<T, U> : IHandle<T> where T : U
 	{
 		private readonly IHandle<U> handler;
 
-		public Widener(IHandle<U> handler )
+		public Widener(IHandle<U> handler)
 		{
 			this.handler = handler;
 		}
@@ -140,40 +144,36 @@
 
 	public class Dispatcher
 	{
-		private readonly Dictionary<string, Multiplexer<IMessage>> topics = new Dictionary<string, Multiplexer<IMessage>>(); 
-		 
+		private readonly Dictionary<string, Multiplexer<IMessage>> topics = new Dictionary<string, Multiplexer<IMessage>>();
+
 		public void Publish<T>(string topic, T message) where T : IMessage
 		{
 			topics[topic].Handle(message);
 			topics[message.CorolationId.ToString()].Handle(message);
 			//new Widener<T, IMessage>(topics[topic]).Handle(message);
 			//new Widener<T, IMessage>(topics[message.CorolationId.ToString()]).Handle(message);
-			
 		}
-
-
-
 
 		public void Publish<T>(T message) where T : IMessage
 		{
 			Publish(message.GetType().Name, message);
 		}
 
-		public void Subscribe<T>(IHandle<T> handler) where  T:IMessage
+		public void Subscribe<T>(IHandle<T> handler) where T : IMessage
 		{
-			Subscribe(handler, typeof(T).Name);
+			Subscribe(handler, typeof (T).Name);
 		}
 
-		public void Subscribe<T>(IHandle<T> handler, string topic ) where T : IMessage
+		public void Subscribe<T>(IHandle<T> handler, string topic) where T : IMessage
 		{
-			if(!topics.ContainsKey(topic))
+			if (!topics.ContainsKey(topic))
 			{
 				topics.Add(topic, new Multiplexer<IMessage>());
 			}
 
 			var multi = topics[topic];
 
-			multi.AddHandler( new Narrower<IMessage, T>(handler));
+			multi.AddHandler(new Narrower<IMessage, T>(handler));
 		}
 
 		public void Unsubscribe<T>(IHandle<T> handler, string topic) where T : IMessage
@@ -182,10 +182,6 @@
 
 			multi.RemoveHandler(new Narrower<IMessage, T>(handler));
 		}
-
-
-
-
 	}
 
 	public class Monitor
@@ -206,7 +202,6 @@
 		{
 			while (true)
 			{
-
 				foreach (var queuedHandler in handlers)
 				{
 					Console.WriteLine("Queue {0} count {1}", queuedHandler.Name, queuedHandler.Count());
@@ -235,14 +230,15 @@
 			this.name = name;
 		}
 
-		public string Name { get { return this.name; } }
+		public string Name
+		{
+			get { return name; }
+		}
 
 		public int Count()
 		{
 			return queuedMessages.Count;
 		}
-
-
 
 		public void Start()
 		{
@@ -263,7 +259,6 @@
 			}
 		}
 
-		
 		public void Stop()
 		{
 			canceled = true;
@@ -324,9 +319,6 @@
 				}
 				messageHandlers.Enqueue(handler);
 			}
-
-
-
 		}
 
 		public void AddHandler(QueuedHandler<T> handler)
@@ -335,11 +327,11 @@
 		}
 	}
 
-	public class Limiter<T>: IHandle<T> where T: IMessage
+	public class Limiter<T> : IHandle<T> where T : IMessage
 	{
 		private readonly QueuedHandler<T> handler;
 
-		public Limiter(QueuedHandler<T> handler )
+		public Limiter(QueuedHandler<T> handler)
 		{
 			this.handler = handler;
 		}
@@ -385,21 +377,18 @@
 		void Handle(T message);
 	}
 
-	public class Order 
+	public class Order
 	{
 		private JObject json;
 
 		public Order() : this(new JObject())
 		{
-
 		}
 
 		public Order(JObject json)
 		{
 			this.json = json;
 		}
-
-		
 
 		public int TableNumber
 		{
@@ -444,7 +433,10 @@
 
 		public void AddItem(string name, int qty)
 		{
-			if (json["Items"] == null) json.Add("Items", new JArray());
+			if (json["Items"] == null)
+			{
+				json.Add("Items", new JArray());
+			}
 			var jo = new JObject();
 			var item = new Item(jo);
 			item.Name = name;
@@ -461,7 +453,7 @@
 
 		public Guid Id
 		{
-			get { return new Guid((string)json["Id"]); }
+			get { return new Guid((string) json["Id"]); }
 			set { json["Id"] = value.ToString(); }
 		}
 
@@ -471,7 +463,6 @@
 
 			public Item()
 			{
-
 			}
 
 			public Item(JToken json)
@@ -503,10 +494,8 @@
 				set { json["Price"] = value; }
 			}
 
-
 			public void AddTo(JObject jsonDocument)
 			{
-
 			}
 		}
 
@@ -517,7 +506,7 @@
 			public void CanReadOrderNumber()
 			{
 				var o = GetOrderDocument();
-				Order order = new Order(o);
+				var order = new Order(o);
 				Assert.That(order.Id, Is.EqualTo(1234));
 			}
 
@@ -525,7 +514,7 @@
 			public void CanReadItems()
 			{
 				var o = GetOrderDocument();
-				Order order = new Order(o);
+				var order = new Order(o);
 				Assert.That(order.Items.First().Name, Is.EqualTo("something"));
 			}
 
@@ -533,7 +522,7 @@
 			{
 				using (var stream = File.OpenText("OrderDocument.js"))
 				{
-					return (JObject) JObject.ReadFrom(new Newtonsoft.Json.JsonTextReader(stream));
+					return (JObject) JToken.ReadFrom(new JsonTextReader(stream));
 				}
 			}
 		}

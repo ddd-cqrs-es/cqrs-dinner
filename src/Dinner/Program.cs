@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ConsoleApplication1
 {
@@ -54,7 +50,7 @@ namespace ConsoleApplication1
 			monitor.Start();
 			new Thread(TryPay).Start(cashier);
 
-            for (int i = 0; i < 100000; i++)
+            for (int i = 0; i < 100; i++)
             {
                 var orderNumber = waiter.PlaceOrder(new[] { Tuple.Create("Burger", 1) }, 15);
                 orders.TryAdd(orderNumber, null);

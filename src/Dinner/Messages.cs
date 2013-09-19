@@ -2,15 +2,15 @@
 {
 	using System;
 
-	public class FoodPrepared: IMessage
+	public class FoodPrepared : IMessage
 	{
 		public FoodPrepared()
 		{
 			Id = Guid.NewGuid();
 		}
 
-		public Guid CausationId { get;  set; }
-		public Guid CorolationId { get;  set; }
+		public Guid CausationId { get; set; }
+		public Guid CorolationId { get; set; }
 		public Order Order;
 		public Guid Id { get; private set; }
 
@@ -33,10 +33,15 @@
 			return "Order placed";
 		}
 
-		public Guid CausationId { get;  set; }
-		public Guid CorolationId { get;  set; }
+		public Guid CausationId { get; set; }
+		public Guid CorolationId { get; set; }
 		public Order Order;
-		public Guid Id { get; set; }public DateTime TTL { get { return Order.TTL; } }
+		public Guid Id { get; set; }
+
+		public DateTime TTL
+		{
+			get { return Order.TTL; }
+		}
 	}
 
 	public class OrderPriced : IMessage
@@ -46,8 +51,8 @@
 			Id = Guid.NewGuid();
 		}
 
-		public Guid CausationId { get;  set; }
-		public Guid CorolationId { get;  set; }
+		public Guid CausationId { get; set; }
+		public Guid CorolationId { get; set; }
 		public Guid Id { get; private set; }
 		public Order Order;
 
@@ -64,8 +69,8 @@
 			Id = Guid.NewGuid();
 		}
 
-		public Guid CausationId { get;  set; }
-		public Guid CorolationId { get;  set; }
+		public Guid CausationId { get; set; }
+		public Guid CorolationId { get; set; }
 		public Order Order;
 		public Guid Id { get; private set; }
 
@@ -74,5 +79,4 @@
 			return "Order Paid";
 		}
 	}
-
 }

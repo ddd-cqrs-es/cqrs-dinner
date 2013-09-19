@@ -36,7 +36,7 @@
 			var order = ordersAwaitingPaymentByOrderNumber[orderNumber];
 			order.IsPaid = true;
 
-			dispatcher.Publish(new OrderPaid{CausationId = Guid.NewGuid(), CorolationId = order.Id ,Order= order});
+			dispatcher.Publish(new OrderPaid {CausationId = Guid.NewGuid(), CorolationId = order.Id, Order = order});
 		}
 	}
 
@@ -57,17 +57,20 @@
 			var order = message.Order;
 			foreach (var item in order.Items)
 			{
-				if (pricesByDishName.ContainsKey(item.Name)) item.Price = pricesByDishName[item.Name]*item.Qty;
-				else throw new Exception("I have no idea what the price is!!!!");
-
-				
+				if (pricesByDishName.ContainsKey(item.Name))
+				{
+					item.Price = pricesByDishName[item.Name]*item.Qty;
+				}
+				else
+				{
+					throw new Exception("I have no idea what the price is!!!!");
+				}
 			}
-
 
 			order.SubTotal = order.Items.Sum(i => i.Price);
 			order.Total = order.SubTotal + (order.SubTotal*taxRate);
 
-			dispatcher.Publish(new OrderPriced{CausationId = message.Id, CorolationId = message.CorolationId, Order = order});
+			dispatcher.Publish(new OrderPriced {CausationId = message.Id, CorolationId = message.CorolationId, Order = order});
 		}
 	}
 
@@ -90,13 +93,23 @@
 			var order = message.Order;
 			foreach (var item in order.Items)
 			{
-				if (ingredientsByDishName.ContainsKey(item.Name)) item.Ingredients = ingredientsByDishName[item.Name].ToList();
-				else throw new Exception("I have no idea how to cook this!!!!");
-
+				if (ingredientsByDishName.ContainsKey(item.Name))
+				{
+					item.Ingredients = ingredientsByDishName[item.Name].ToList();
+				}
+				else
+				{
+					throw new Exception("I have no idea how to cook this!!!!");
+				}
 			}
 
 			Thread.Sleep(speed);
-			dispatcher.Publish(new FoodPrepared{CausationId = message.Id, CorolationId = message.CorolationId, Order = message.Order});
+			dispatcher.Publish(new FoodPrepared
+				{
+					CausationId = message.Id,
+					CorolationId = message.CorolationId,
+					Order = message.Order
+				});
 		}
 	}
 
@@ -117,10 +130,12 @@
 			order.TableNumber = tableNumber;
 			order.Created = DateTime.Now;
 			order.TTL = order.Created.AddSeconds(1000);
-			foreach (var item in items) order.AddItem(item.Item1, item.Item2);
-			dispatcher.Publish(new OrderPlaced{ Id= order.Id, CorolationId = order.Id, CausationId = Guid.Empty,  Order= order});
+			foreach (var item in items)
+			{
+				order.AddItem(item.Item1, item.Item2);
+			}
+			dispatcher.Publish(new OrderPlaced {Id = order.Id, CorolationId = order.Id, CausationId = Guid.Empty, Order = order});
 			return order.Id;
 		}
 	}
-
 }
