@@ -1,16 +1,13 @@
-﻿using System;
-
-namespace ConsoleApplication1
+﻿namespace Dinner
 {
+	using System;
 	using System.Collections.Concurrent;
 	using System.Threading;
-	using Dinner;
-	using Monitor = Dinner.Monitor;
 
-	class Program
+	static class Program
     {
 
-		static  ConcurrentDictionary<Guid, object> orders = new ConcurrentDictionary<Guid, object>();
+		static readonly ConcurrentDictionary<Guid, object> orders = new ConcurrentDictionary<Guid, object>();
 
 		static void Main(string[] args)
 		{
@@ -20,8 +17,8 @@ namespace ConsoleApplication1
             var ass = new AssMan(d);
 
 			var cookDispatcher = new SmartDispatcher<OrderPlaced>();
-			var cookTTLGate = new TimeToLiveGate<OrderPlaced>(cookDispatcher);
-			var cookQueudHandler = new QueuedHandler<OrderPlaced>(cookTTLGate, "dispatcher");
+			var cookTtlGate = new TimeToLiveGate<OrderPlaced>(cookDispatcher);
+			var cookQueudHandler = new QueuedHandler<OrderPlaced>(cookTtlGate, "dispatcher");
 			var cookLimiter = new Limiter<OrderPlaced>(cookQueudHandler);
 			var monitor2 = new Monitor2(d);
 
@@ -74,7 +71,9 @@ namespace ConsoleApplication1
 						object val;
 						orders.TryRemove(order.Key,out val);
 					}
+// ReSharper disable EmptyGeneralCatchClause
 					catch
+// ReSharper restore EmptyGeneralCatchClause
 					{
 					}
 				}
