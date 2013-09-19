@@ -1,0 +1,11 @@
+﻿{
+    Waiter: "Gary",
+    TableNumber: 23,
+    Items:[{ Name: "something", Qty: 2, Price: 10 }, { Name: "sdgsdg", Qty:1, Price: 20}],
+    Total: 30,
+    SubTotal: 30,
+    Tax: 0,
+    OrderNumber: 1234,
+    IsPaid: true,
+    Receipt: null
+}
