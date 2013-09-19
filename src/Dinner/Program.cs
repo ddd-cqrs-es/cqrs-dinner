@@ -3,17 +3,18 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using DocumentProblem;
 
 namespace ConsoleApplication1
 {
 	using System.Collections.Concurrent;
 	using System.Threading;
+	using Dinner;
+	using Monitor = Dinner.Monitor;
 
 	class Program
     {
 
-		static  ConcurrentDictionary<int, object> orders = new ConcurrentDictionary<int, object>();
+		static  ConcurrentDictionary<Guid, object> orders = new ConcurrentDictionary<Guid, object>();
 
 		static void Main(string[] args)
 		{
@@ -22,24 +23,24 @@ namespace ConsoleApplication1
             var cashier = new Cashier(d);
             var ass = new AssMan(d);
 
-			var cookDispatcher = new SmartDispatcher<Order>();
-			var cookTTLGate = new TimeToLiveGate<Order>(cookDispatcher);
-			var cookQueudHandler = new QueuedHandler<Order>(cookTTLGate, "dispatcher");
-			var cookLimiter = new Limiter<Order>(cookQueudHandler);
+			var cookDispatcher = new SmartDispatcher<OrderPlaced>();
+			var cookTTLGate = new TimeToLiveGate<OrderPlaced>(cookDispatcher);
+			var cookQueudHandler = new QueuedHandler<OrderPlaced>(cookTTLGate, "dispatcher");
+			var cookLimiter = new Limiter<OrderPlaced>(cookQueudHandler);
 			
-			d.Subscribe(cookLimiter, "order-created");
-			d.Subscribe(ass, "order-ready");
-			d.Subscribe(cashier, "order-priced");
-			d.Subscribe(manager, "order-paid");
+			d.Subscribe(cookLimiter);
+			d.Subscribe(ass);
+			d.Subscribe(cashier);
+			d.Subscribe(manager);
 
-			var cookQueudHandler1 = new QueuedHandler<Order>(new Cook(d, 10000), "c1");
+			var cookQueudHandler1 = new QueuedHandler<OrderPlaced>(new Cook(d, 10000), "c1");
 			cookDispatcher.AddHandler(cookQueudHandler1);
-			var cookQueudHandler2 = new QueuedHandler<Order>(new Cook(d, 1000), "c2");
+			var cookQueudHandler2 = new QueuedHandler<OrderPlaced>(new Cook(d, 1000), "c2");
 			cookDispatcher.AddHandler(cookQueudHandler2);
-			var cookQueudHandler3 = new QueuedHandler<Order>(new Cook(d, 100), "c3");	
+			var cookQueudHandler3 = new QueuedHandler<OrderPlaced>(new Cook(d, 100), "c3");	
 			cookDispatcher.AddHandler(cookQueudHandler3);
 
-			var monitor = new Monitor<Order>(new[] {cookQueudHandler1, cookQueudHandler2, cookQueudHandler3, cookQueudHandler});
+			var monitor = new Monitor(new[] {cookQueudHandler1, cookQueudHandler2, cookQueudHandler3, cookQueudHandler});
 		
             //Cook cook = new Cook(ass);
             var waiter = new Waiter(d);

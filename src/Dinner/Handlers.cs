@@ -1,15 +1,15 @@
-﻿using Newtonsoft.Json.Linq;
-using NUnit.Framework;
-using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-
-namespace DocumentProblem
+﻿namespace Dinner
 {
+	using Newtonsoft.Json.Linq;
+	using NUnit.Framework;
+	using System;
+	using System.Collections.Concurrent;
+	using System.Collections.Generic;
+	using System.IO;
+	using System.Linq;
+	using System.Threading;
+
+
 	public class Multiplexer<T> : IHandle<T> where T : IMessage
 	{
 		private List<IHandle<T>> messageHandlers = new List<IHandle<T>>();
@@ -49,6 +49,12 @@ namespace DocumentProblem
 		}
 	}
 
+	public class Monitor2: IHandle<IMessage>{
+		public void Handle(IMessage message)
+		{
+			Console.WriteLine("Id:{0} CaId:{1} CoId:{2} {3}", message.Id, message.CausationId, message.CorolationId, message.ToString());
+		}
+	}
 
 	public class Narrower<T, U> : IHandle<T>, IEquatable<Narrower<T, U>> where U: T
 	{
@@ -124,6 +130,17 @@ namespace DocumentProblem
 			new Widener<T, IMessage>(topics[topic]).Handle(message);
 		}
 
+
+		public void Publish<T>(T message) where T : IMessage
+		{
+			new Widener<T, IMessage>(topics[message.GetType().Name]).Handle(message);
+		}
+
+		public void Subscribe<T>(IHandle<T> handler) where  T:IMessage
+	{
+		Subscribe(handler, typeof(T).Name);
+	}
+
 		public void Subscribe<T>(IHandle<T> handler, string topic ) where T : IMessage
 		{
 			if(!topics.ContainsKey(topic))
@@ -148,13 +165,11 @@ namespace DocumentProblem
 
 	}
 
-	
-	
-	public class Monitor<T> where T : IMessage
+	public class Monitor
 	{
-		private IEnumerable<QueuedHandler<T>> handlers;
+		private IEnumerable<IAmMonitored> handlers;
 
-		public Monitor(IEnumerable<QueuedHandler<T>> handlers)
+		public Monitor(IEnumerable<IAmMonitored> handlers)
 		{
 			this.handlers = handlers;
 		}
@@ -171,18 +186,24 @@ namespace DocumentProblem
 
 				foreach (var queuedHandler in handlers)
 				{
-					Console.WriteLine("Queue {0} count {1}", queuedHandler.name, queuedHandler.Count());
+					Console.WriteLine("Queue {0} count {1}", queuedHandler.Name, queuedHandler.Count());
 				}
 				Thread.Sleep(1000);
 			}
 		}
 	}
 
-	public class QueuedHandler<T> : IHandle<T> where T : IMessage
+	public interface IAmMonitored
+	{
+		string Name { get; }
+		int Count();
+	}
+
+	public class QueuedHandler<T> : IAmMonitored, IHandle<T> where T : IMessage
 	{
 		private ConcurrentQueue<T> queuedMessages = new ConcurrentQueue<T>();
 		private IHandle<T> handler;
-		public readonly string name;
+		private readonly string name;
 		private volatile bool canceled;
 
 		public QueuedHandler(IHandle<T> handler, string name)
@@ -191,10 +212,7 @@ namespace DocumentProblem
 			this.name = name;
 		}
 
-		private void PrintCount()
-		{
-			Console.WriteLine("Queue {0} count {1}", name, queuedMessages.Count);
-		}
+		public string Name { get { return this.name; } }
 
 		public int Count()
 		{
@@ -222,15 +240,7 @@ namespace DocumentProblem
 			}
 		}
 
-		private void PrintEverySecond()
-		{
-			while (true)
-			{
-				PrintCount();
-
-			}
-		}
-
+		
 		public void Stop()
 		{
 			canceled = true;
@@ -342,7 +352,9 @@ namespace DocumentProblem
 
 	public interface IMessage
 	{
-		int Id { get; }
+		Guid Id { get; }
+		Guid CausationId { get; }
+		Guid CorolationId { get; }
 	}
 
 	public interface IHandle<T>
@@ -350,128 +362,7 @@ namespace DocumentProblem
 		void Handle(T message);
 	}
 
-	public class Waiter
-	{
-		private readonly Dispatcher dispatcher;
-		private int lastOrderNumber;
-
-		public Waiter(Dispatcher dispatcher)
-		{
-			this.dispatcher = dispatcher;
-		}
-
-		public int PlaceOrder(IEnumerable<Tuple<string, int>> items, int tableNumber)
-		{
-			Order order = new Order();
-			order.OrderNumber = ++lastOrderNumber;
-			order.TableNumber = tableNumber;
-			order.Created = DateTime.Now;
-			order.TTL = order.Created.AddSeconds(1000);
-			foreach (var item in items) order.AddItem(item.Item1, item.Item2);
-			dispatcher.Publish("order-created", order);
-			return order.OrderNumber;
-		}
-	}
-
-	public class Cook : IHandle<Order>
-	{
-		private Dictionary<string, List<string>> ingredientsByDishName = new Dictionary<string, List<string>>();
-		private Dispatcher dispatcher;
-		private readonly int speed;
-
-		public Cook(Dispatcher dispatcher, int speed)
-		{
-			ingredientsByDishName.Add("Burger", new List<string> {"Bun", "Meat"});
-
-			this.dispatcher = dispatcher;
-			this.speed = speed;
-		}
-
-		public void Handle(Order message)
-		{
-			foreach (var item in message.Items)
-			{
-				if (ingredientsByDishName.ContainsKey(item.Name)) item.Ingredients = ingredientsByDishName[item.Name].ToList();
-				else throw new Exception("I have no idea how to cook this!!!!");
-
-				Console.WriteLine("Cooking: " + item.Name);
-			}
-
-			Thread.Sleep(speed);
-			dispatcher.Publish("order-ready",message);
-		}
-	}
-
-	public class AssMan : IHandle<Order>
-	{
-		private decimal taxRate = 0.07m;
-		private Dictionary<string, decimal> pricesByDishName = new Dictionary<string, decimal>();
-		private Dispatcher dispatcher;
-
-		public AssMan(Dispatcher dispatcher)
-		{
-			this.dispatcher = dispatcher;
-			pricesByDishName.Add("Burger", 10);
-		}
-
-		public void Handle(Order message)
-		{
-			foreach (var item in message.Items)
-			{
-				if (pricesByDishName.ContainsKey(item.Name)) item.Price = pricesByDishName[item.Name]*item.Qty;
-				else throw new Exception("I have no idea what the price is!!!!");
-
-				
-			}
-
-			Console.WriteLine("Calculating price");
-
-			message.SubTotal = message.Items.Sum(i => i.Price);
-			message.Total = message.SubTotal + (message.SubTotal*taxRate);
-
-			dispatcher.Publish("order-priced", message);
-		}
-	}
-
-	public class Cashier : IHandle<Order>
-	{
-		private readonly Dispatcher dispatcher;
-		private Dictionary<int, Order> ordersAwaitingPaymentByOrderNumber = new Dictionary<int, Order>();
-		private IHandle<Order> handlesOrder;
-
-		public Cashier(Dispatcher dispatcher)
-		{
-			this.dispatcher = dispatcher;
-		}
-
-		public void Handle(Order message)
-		{
-			ordersAwaitingPaymentByOrderNumber.Add(message.OrderNumber, message);
-		}
-
-		public void PayForOrder(int orderNumber)
-		{
-			var order = ordersAwaitingPaymentByOrderNumber[orderNumber];
-			order.IsPaid = true;
-
-			Console.WriteLine("Paying for order " + orderNumber);
-			dispatcher.Publish("order-paid", order);
-		}
-	}
-
-	public class Manager : IHandle<Order>
-	{
-		public void Handle(Order message)
-		{
-			message.Completed = DateTime.Now;
-
-			Console.WriteLine(message.OrderNumber + " is completed!");
-			Console.WriteLine("Processing time for order {0} was {1}", message.OrderNumber,
-			                  message.Completed.Subtract(message.Created));
-		}
-	}
-
-	public class Order : IMessage, IHaveTimeToLive
+	public class Order 
 	{
 		private JObject json;
 
@@ -485,11 +376,7 @@ namespace DocumentProblem
 			this.json = json;
 		}
 
-		public int OrderNumber
-		{
-			get { return (int) json["OrderNumber"]; }
-			set { json["OrderNumber"] = value; }
-		}
+		
 
 		public int TableNumber
 		{
@@ -549,9 +436,10 @@ namespace DocumentProblem
 			set { json["TTL"] = value; }
 		}
 
-		public int Id
+		public Guid Id
 		{
-			get { return this.OrderNumber; }
+			get { return new Guid((string)json["Id"]); }
+			set { json["Id"] = value.ToString(); }
 		}
 
 		public class Item
@@ -607,7 +495,7 @@ namespace DocumentProblem
 			{
 				var o = GetOrderDocument();
 				Order order = new Order(o);
-				Assert.That(order.OrderNumber, Is.EqualTo(1234));
+				Assert.That(order.Id, Is.EqualTo(1234));
 			}
 
 			[Test]
