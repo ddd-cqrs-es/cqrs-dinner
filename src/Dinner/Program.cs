@@ -27,11 +27,13 @@ namespace ConsoleApplication1
 			var cookTTLGate = new TimeToLiveGate<OrderPlaced>(cookDispatcher);
 			var cookQueudHandler = new QueuedHandler<OrderPlaced>(cookTTLGate, "dispatcher");
 			var cookLimiter = new Limiter<OrderPlaced>(cookQueudHandler);
-			
+			var monitor2 = new Monitor2(d);
+
 			d.Subscribe(cookLimiter);
 			d.Subscribe(ass);
 			d.Subscribe(cashier);
 			d.Subscribe(manager);
+			d.Subscribe<OrderPlaced>(monitor2);
 
 			var cookQueudHandler1 = new QueuedHandler<OrderPlaced>(new Cook(d, 10000), "c1");
 			cookDispatcher.AddHandler(cookQueudHandler1);

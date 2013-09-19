@@ -49,10 +49,28 @@
 		}
 	}
 
-	public class Monitor2: IHandle<IMessage>{
+	public class Monitor2: IHandle<IMessage>, IHandle<OrderPlaced>
+	{
+		private readonly Dispatcher d;
+
+		public Monitor2(Dispatcher d)
+		{
+			this.d = d;
+		}
+
 		public void Handle(IMessage message)
 		{
 			Console.WriteLine("Id:{0} CaId:{1} CoId:{2} {3}", message.Id, message.CausationId, message.CorolationId, message.ToString());
+		}
+
+		public void Handle(OrderPlaced message)
+		{
+			d.Subscribe<IMessage>(this, message.CorolationId.ToString());
+		}
+
+		public void Handle(OrderPaid message)
+		{
+			d.Unsubscribe<IMessage>(this, message.CorolationId.ToString());
 		}
 	}
 
@@ -124,22 +142,27 @@
 	{
 		private readonly Dictionary<string, Multiplexer<IMessage>> topics = new Dictionary<string, Multiplexer<IMessage>>(); 
 		 
-
 		public void Publish<T>(string topic, T message) where T : IMessage
 		{
-			new Widener<T, IMessage>(topics[topic]).Handle(message);
+			topics[topic].Handle(message);
+			topics[message.CorolationId.ToString()].Handle(message);
+			//new Widener<T, IMessage>(topics[topic]).Handle(message);
+			//new Widener<T, IMessage>(topics[message.CorolationId.ToString()]).Handle(message);
+			
 		}
+
+
 
 
 		public void Publish<T>(T message) where T : IMessage
 		{
-			new Widener<T, IMessage>(topics[message.GetType().Name]).Handle(message);
+			Publish(message.GetType().Name, message);
 		}
 
 		public void Subscribe<T>(IHandle<T> handler) where  T:IMessage
-	{
-		Subscribe(handler, typeof(T).Name);
-	}
+		{
+			Subscribe(handler, typeof(T).Name);
+		}
 
 		public void Subscribe<T>(IHandle<T> handler, string topic ) where T : IMessage
 		{
@@ -150,7 +173,7 @@
 
 			var multi = topics[topic];
 
-			multi.AddHandler(new Narrower<IMessage, T>(handler));
+			multi.AddHandler( new Narrower<IMessage, T>(handler));
 		}
 
 		public void Unsubscribe<T>(IHandle<T> handler, string topic) where T : IMessage

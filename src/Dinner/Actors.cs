@@ -11,7 +11,6 @@
 		{
 			message.Order.Completed = DateTime.Now;
 
-			Console.WriteLine(message.Order.Id + " is completed!");
 			Console.WriteLine("Processing time for order {0} was {1}", message.Order.Id,
 			                  message.Order.Completed.Subtract(message.Order.Created));
 		}
@@ -37,7 +36,6 @@
 			var order = ordersAwaitingPaymentByOrderNumber[orderNumber];
 			order.IsPaid = true;
 
-			Console.WriteLine("Paying for order " + orderNumber);
 			dispatcher.Publish(new OrderPaid{CausationId = Guid.NewGuid(), CorolationId = order.Id ,Order= order});
 		}
 	}
@@ -65,7 +63,6 @@
 				
 			}
 
-			Console.WriteLine("Calculating price");
 
 			order.SubTotal = order.Items.Sum(i => i.Price);
 			order.Total = order.SubTotal + (order.SubTotal*taxRate);
@@ -96,7 +93,6 @@
 				if (ingredientsByDishName.ContainsKey(item.Name)) item.Ingredients = ingredientsByDishName[item.Name].ToList();
 				else throw new Exception("I have no idea how to cook this!!!!");
 
-				Console.WriteLine("Cooking: " + item.Name);
 			}
 
 			Thread.Sleep(speed);

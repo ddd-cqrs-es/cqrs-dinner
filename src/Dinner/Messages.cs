@@ -13,6 +13,11 @@
 		public Guid CorolationId { get;  set; }
 		public Order Order;
 		public Guid Id { get; private set; }
+
+		public override string ToString()
+		{
+			return "Food prepared";
+		}
 	}
 
 	public class OrderPlaced : IMessage, IHaveTimeToLive
@@ -21,6 +26,11 @@
 		{
 			Id = Guid.NewGuid();
 			CorolationId = Id;
+		}
+
+		public override string ToString()
+		{
+			return "Order placed";
 		}
 
 		public Guid CausationId { get;  set; }
@@ -40,6 +50,11 @@
 		public Guid CorolationId { get;  set; }
 		public Guid Id { get; private set; }
 		public Order Order;
+
+		public override string ToString()
+		{
+			return "Order priced";
+		}
 	}
 
 	public class OrderPaid : IMessage
@@ -53,6 +68,11 @@
 		public Guid CorolationId { get;  set; }
 		public Order Order;
 		public Guid Id { get; private set; }
+
+		public override string ToString()
+		{
+			return "Order Paid";
+		}
 	}
 
 }
