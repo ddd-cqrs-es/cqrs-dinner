@@ -2,6 +2,20 @@
 {
 	using System;
 
+	public class DodgyOrderPlaced:IMessage
+	{
+		public DodgyOrderPlaced()
+		{
+			Id = Guid.NewGuid();
+		}
+
+		public Guid Id { get; set; }
+		public Guid CausationId { get; set; }
+		public Guid CorolationId { get; set; }
+
+		public Order Order { get; set; }
+	}
+
 	public class OrderCompleted:IMessage
 	{
 		public OrderCompleted()

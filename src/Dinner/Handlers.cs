@@ -52,7 +52,8 @@
 		}
 	}
 
-	public class Monitor2 : IHandle<IMessage>, IHandle<OrderPlaced>
+	public class 
+		Monitor2 : IHandle<IMessage>, IHandle<OrderPlaced>, IHandle<DodgyOrderPlaced>
 	{
 		private readonly Dispatcher d;
 
@@ -70,6 +71,12 @@
 		{
 			d.Subscribe<IMessage>(this, message.CorolationId.ToString());
 		}
+
+		public void Handle(DodgyOrderPlaced message)
+		{
+			d.Subscribe<IMessage>(this, message.CorolationId.ToString());
+		}
+
 
 		public void Handle(OrderPaid message)
 		{

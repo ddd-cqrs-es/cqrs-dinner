@@ -141,5 +141,20 @@
 			dispatcher.Publish(new OrderPlaced {Id = order.Id, CorolationId = order.Id, CausationId = Guid.Empty, Order = order});
 			return order.Id;
 		}
+
+		public Guid PlaceDodgyOrder(IEnumerable<Tuple<string, int>> items, int tableNumber)
+		{
+			var order = new Order();
+			order.Id = Guid.NewGuid();
+			order.TableNumber = tableNumber;
+			order.Created = DateTime.Now;
+			order.TTL = order.Created.AddSeconds(1000);
+			foreach (var item in items)
+			{
+				order.AddItem(item.Item1, item.Item2);
+			}
+			dispatcher.Publish(new DodgyOrderPlaced() { Id = order.Id, CorolationId = order.Id, CausationId = Guid.Empty, Order = order });
+			return order.Id;
+		}
 	}
 }

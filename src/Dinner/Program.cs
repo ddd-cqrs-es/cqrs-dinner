@@ -14,6 +14,7 @@
 			var d = new Dispatcher();
 			var midgetHouse = new MidgetHouse(d);
 			d.Subscribe<OrderPlaced>(midgetHouse);
+			d.Subscribe<DodgyOrderPlaced>(midgetHouse);
 			var manager = new Manager();
             var cashier = new Cashier(d);
             var ass = new AssMan(d);
@@ -31,7 +32,8 @@
 			d.Subscribe(cashier);
 			d.Subscribe(manager);
 			d.Subscribe<OrderPlaced>(monitor2);
-		
+			d.Subscribe<DodgyOrderPlaced>(monitor2);
+
 			var cookQueudHandler1 = new QueuedHandler<CookFood>(new Cook(d, 10000), "c1");
 			cookDispatcher.AddHandler(cookQueudHandler1);
 			var cookQueudHandler2 = new QueuedHandler<CookFood>(new Cook(d, 1000), "c2");
@@ -56,10 +58,21 @@
 			
 			new Thread(TryPay).Start(cashier);
 
-            for (int i = 0; i < 100; i++)
+			Random r = new Random();
+            for (int i = 0; i < 1; i++)
             {
-                var orderNumber = waiter.PlaceOrder(new[] { Tuple.Create("Burger", 1) }, 15);
-                orders.TryAdd(orderNumber, null);
+	            Guid orderNumber;
+//	            if (r.Next()%2 == 0)
+//				{
+//					orderNumber = waiter.PlaceOrder(new[] {Tuple.Create("Burger", 1)}, 15);
+//
+//				}
+//				else
+//				{
+					orderNumber = waiter.PlaceDodgyOrder(new[] { Tuple.Create("Burger", 1) }, 15);
+//				}
+
+	            orders.TryAdd(orderNumber, null);
 		    }
             //var orderNumber = waiter.PlaceOrder(new[] {Tuple.Create("Burger", 1)}, 15);
             //cashier.PayForOrder(orderNumber);
