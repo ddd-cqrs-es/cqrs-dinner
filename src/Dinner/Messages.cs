@@ -2,6 +2,67 @@
 {
 	using System;
 
+	public class OrderCompleted:IMessage
+	{
+		public OrderCompleted()
+		{
+			Id = Guid.NewGuid();
+		}
+
+		public Order Order { get; set; }
+		public Guid Id { get; private set; }
+		public Guid CausationId { get; set; }
+		public Guid CorolationId { get; set; }
+	}
+
+	public class PrepareForPayment:IMessage
+	{
+		public PrepareForPayment()
+		{
+			Id = Guid.NewGuid();
+		}
+
+		public Guid Id { get; private set; }
+		public Guid CausationId { get; set; }
+		public Guid CorolationId { get; set; }
+
+		public Order Order { get; set; }
+	}
+
+	public class PriceOrder:IMessage
+	{
+		public PriceOrder()
+		{
+			Id = Guid.NewGuid();
+		}
+
+		public Order Order { get; set; }
+		public Guid Id { get; private set; }
+		public Guid CausationId { get; set; }
+		public Guid CorolationId { get; set; }
+	}
+
+	public class CookFood : IMessage, IHaveTimeToLive
+	{
+		public CookFood()
+		{
+			Id =
+			Guid.NewGuid();
+		}
+
+		public Guid Id { get;  set; }
+		public Guid CausationId { get;  set; }
+		public Guid CorolationId { get;  set; }
+		public Order Order { get; set; }
+		
+		public override string ToString()
+		{
+			return "Cook Food";
+		}
+
+		public DateTime TTL { get;  set; }
+	}
+
 	public class FoodPrepared : IMessage
 	{
 		public FoodPrepared()

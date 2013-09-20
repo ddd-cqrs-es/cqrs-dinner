@@ -5,9 +5,11 @@
 	using System.Linq;
 	using System.Threading;
 
-	public class Manager : IHandle<OrderPaid>
+	public class Manager : IHandle<OrderCompleted>
 	{
-		public void Handle(OrderPaid message)
+		
+
+		public void Handle(OrderCompleted message)
 		{
 			message.Order.Completed = DateTime.Now;
 
@@ -16,7 +18,7 @@
 		}
 	}
 
-	public class Cashier : IHandle<OrderPriced>
+	public class Cashier : IHandle<PrepareForPayment>
 	{
 		private readonly Dispatcher dispatcher;
 		private Dictionary<Guid, Order> ordersAwaitingPaymentByOrderNumber = new Dictionary<Guid, Order>();
@@ -26,10 +28,11 @@
 			this.dispatcher = dispatcher;
 		}
 
-		public void Handle(OrderPriced message)
+		public void Handle(PrepareForPayment message)
 		{
 			ordersAwaitingPaymentByOrderNumber.Add(message.Order.Id, message.Order);
 		}
+
 
 		public void PayForOrder(Guid orderNumber)
 		{
@@ -40,7 +43,7 @@
 		}
 	}
 
-	public class AssMan : IHandle<FoodPrepared>
+	public class AssMan : IHandle<PriceOrder>
 	{
 		private decimal taxRate = 0.07m;
 		private Dictionary<string, decimal> pricesByDishName = new Dictionary<string, decimal>();
@@ -52,9 +55,10 @@
 			pricesByDishName.Add("Burger", 10);
 		}
 
-		public void Handle(FoodPrepared message)
+	
+		public void Handle(PriceOrder message)
 		{
-			var order = message.Order;
+			var order =  message.Order;
 			foreach (var item in order.Items)
 			{
 				if (pricesByDishName.ContainsKey(item.Name))
@@ -74,7 +78,7 @@
 		}
 	}
 
-	public class Cook : IHandle<OrderPlaced>
+	public class Cook : IHandle<CookFood>
 	{
 		private Dictionary<string, List<string>> ingredientsByDishName = new Dictionary<string, List<string>>();
 		private Dispatcher dispatcher;
@@ -88,7 +92,7 @@
 			this.speed = speed;
 		}
 
-		public void Handle(OrderPlaced message)
+		public void Handle(CookFood message)
 		{
 			var order = message.Order;
 			foreach (var item in order.Items)

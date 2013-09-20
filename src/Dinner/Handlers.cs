@@ -77,9 +77,9 @@
 		}
 	}
 
-	public class Narrower<T, U> : IHandle<T>, IEquatable<Narrower<T, U>> where U : T
+	public class Narrower<TInput, TOutput> : IHandle<TInput>, IEquatable<Narrower<TInput, TOutput>> where TOutput : TInput
 	{
-		public bool Equals(Narrower<T, U> other)
+		public bool Equals(Narrower<TInput, TOutput> other)
 		{
 			if (ReferenceEquals(null, other))
 			{
@@ -106,7 +106,7 @@
 			{
 				return false;
 			}
-			return Equals((Narrower<T, U>) obj);
+			return Equals((Narrower<TInput, TOutput>) obj);
 		}
 
 		public override int GetHashCode()
@@ -114,16 +114,35 @@
 			return handler.GetHashCode();
 		}
 
-		private readonly IHandle<U> handler;
+		private readonly IHandle<TOutput> handler;
 
-		public Narrower(IHandle<U> handler)
+		public Narrower(IHandle<TOutput> handler)
 		{
 			this.handler = handler;
 		}
 
-		public void Handle(T message)
+		public void Handle(TInput message)
 		{
-			handler.Handle((U) message);
+			try
+			{
+				handler.Handle((TOutput) message);
+			}
+			catch (InvalidCastException)
+			{
+				
+			}
+		}
+
+		private TOutput ChangeType(TInput message)
+		{
+			try
+			{
+				return (TOutput) message;
+			}
+			catch
+			{
+				return default(TOutput);
+			}
 		}
 	}
 
@@ -148,8 +167,13 @@
 
 		public void Publish<T>(string topic, T message) where T : IMessage
 		{
-			topics[topic].Handle(message);
-			topics[message.CorolationId.ToString()].Handle(message);
+			if (topics.ContainsKey(topic))
+			{
+				topics[topic].Handle(message);
+			}
+			var corolationTopic = message.CorolationId.ToString();
+			if(topics.ContainsKey(corolationTopic))
+			topics[corolationTopic].Handle(message);
 			//new Widener<T, IMessage>(topics[topic]).Handle(message);
 			//new Widener<T, IMessage>(topics[message.CorolationId.ToString()]).Handle(message);
 		}

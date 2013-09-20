@@ -50,6 +50,7 @@
     <Compile Include="Actors.cs" />
     <Compile Include="Handlers.cs" />
     <Compile Include="Messages.cs" />
+    <Compile Include="MidgetHouse.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
