@@ -23,16 +23,19 @@
 			var cookTtlGate = new TimeToLiveGate<CookFood>(cookDispatcher);
 			var cookQueudHandler = new QueuedHandler<CookFood>(cookTtlGate, "dispatcher");
 			var cookLimiter = new Limiter<CookFood>(cookQueudHandler);
-			
-			var monitor2 = new Monitor2(d);
+			var cookScrewsUp = new ScrewsUp<CookFood>(cookLimiter);
 
+			var alarmClock = new AlarmClock(d);
 
-			d.Subscribe(cookLimiter);
+			var messageMonitor = new MessageMonitor(d);
+
+			d.Subscribe(alarmClock);
+			d.Subscribe(cookScrewsUp);
 			d.Subscribe(ass);
 			d.Subscribe(cashier);
 			d.Subscribe(manager);
-			d.Subscribe<OrderPlaced>(monitor2);
-			d.Subscribe<DodgyOrderPlaced>(monitor2);
+			d.Subscribe<OrderPlaced>(messageMonitor);
+			d.Subscribe<DodgyOrderPlaced>(messageMonitor);
 
 			var cookQueudHandler1 = new QueuedHandler<CookFood>(new Cook(d, 10000), "c1");
 			cookDispatcher.AddHandler(cookQueudHandler1);
@@ -42,7 +45,7 @@
 			cookDispatcher.AddHandler(cookQueudHandler3);
 
 
-			var monitor = new Monitor(new[] {cookQueudHandler1, cookQueudHandler2, cookQueudHandler3, cookQueudHandler});
+			var queueMonitor = new QueueMonitor(new[] {cookQueudHandler1, cookQueudHandler2, cookQueudHandler3, cookQueudHandler});
 			
 
 
@@ -53,24 +56,24 @@
 			cookQueudHandler2.Start();
 			cookQueudHandler3.Start();
 			cookQueudHandler.Start();
-			
-			monitor.Start();
+			alarmClock.Start();
+			queueMonitor.Start();
 			
 			new Thread(TryPay).Start(cashier);
 
 			Random r = new Random();
-            for (int i = 0; i < 1; i++)
+            for (int i = 0; i < 10000; i++)
             {
 	            Guid orderNumber;
-//	            if (r.Next()%2 == 0)
-//				{
-//					orderNumber = waiter.PlaceOrder(new[] {Tuple.Create("Burger", 1)}, 15);
-//
-//				}
-//				else
-//				{
+	            if (r.Next()%2 == 0)
+				{
+					orderNumber = waiter.PlaceOrder(new[] {Tuple.Create("Burger", 1)}, 15);
+
+				}
+				else
+				{
 					orderNumber = waiter.PlaceDodgyOrder(new[] { Tuple.Create("Burger", 1) }, 15);
-//				}
+				}
 
 	            orders.TryAdd(orderNumber, null);
 		    }

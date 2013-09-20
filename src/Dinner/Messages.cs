@@ -2,6 +2,21 @@
 {
 	using System;
 
+	public class WakeMeIn:IMessage
+	{
+		public WakeMeIn()
+		{
+			Id = Guid.NewGuid();
+		}
+
+		public Guid Id { get;  set; }
+		public Guid CausationId { get; set; }
+		public Guid CorolationId { get; set; }
+		public IMessage Message { get; set; }
+
+		public int TTL { get; set; }
+	}
+
 	public class DodgyOrderPlaced:IMessage
 	{
 		public DodgyOrderPlaced()

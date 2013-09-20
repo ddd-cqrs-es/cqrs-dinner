@@ -37,6 +37,25 @@
 		}
 	}
 
+	public class ScrewsUp<T>: IHandle<T> where T: IMessage
+	{
+		private readonly IHandle<T> next;
+		private readonly Random rnd;
+
+		public ScrewsUp(IHandle<T> next)
+		{
+			this.next = next;
+			rnd = new Random();
+		}
+
+		public void Handle(T message)
+		{
+			var nextDouble = rnd.NextDouble();
+			if(nextDouble < 0.95) return;
+			next.Handle(message);
+		}
+	}
+
 	public class Combiner<T> : IHandle<T> where T : IMessage
 	{
 		private IHandle<T> handler;
@@ -53,18 +72,18 @@
 	}
 
 	public class 
-		Monitor2 : IHandle<IMessage>, IHandle<OrderPlaced>, IHandle<DodgyOrderPlaced>
+		MessageMonitor : IHandle<IMessage>, IHandle<OrderPlaced>, IHandle<DodgyOrderPlaced>
 	{
 		private readonly Dispatcher d;
 
-		public Monitor2(Dispatcher d)
+		public MessageMonitor(Dispatcher d)
 		{
 			this.d = d;
 		}
 
 		public void Handle(IMessage message)
 		{
-			Console.WriteLine("Id:{0} CaId:{1} CoId:{2} {3}", message.Id, message.CausationId, message.CorolationId, message);
+			Console.WriteLine("{3} Id:{0} CaId:{1} CoId:{2}", message.Id, message.CausationId, message.CorolationId, message);
 		}
 
 		public void Handle(OrderPlaced message)
@@ -77,8 +96,7 @@
 			d.Subscribe<IMessage>(this, message.CorolationId.ToString());
 		}
 
-
-		public void Handle(OrderPaid message)
+		public void Handle(OrderCompleted message)
 		{
 			d.Unsubscribe<IMessage>(this, message.CorolationId.ToString());
 		}
@@ -181,8 +199,6 @@
 			var corolationTopic = message.CorolationId.ToString();
 			if(topics.ContainsKey(corolationTopic))
 			topics[corolationTopic].Handle(message);
-			//new Widener<T, IMessage>(topics[topic]).Handle(message);
-			//new Widener<T, IMessage>(topics[message.CorolationId.ToString()]).Handle(message);
 		}
 
 		public void Publish<T>(T message) where T : IMessage
@@ -215,11 +231,11 @@
 		}
 	}
 
-	public class Monitor
+	public class QueueMonitor
 	{
 		private IEnumerable<IAmMonitored> handlers;
 
-		public Monitor(IEnumerable<IAmMonitored> handlers)
+		public QueueMonitor(IEnumerable<IAmMonitored> handlers)
 		{
 			this.handlers = handlers;
 		}
@@ -250,8 +266,8 @@
 
 	public class QueuedHandler<T> : IAmMonitored, IHandle<T> where T : IMessage
 	{
-		private ConcurrentQueue<T> queuedMessages = new ConcurrentQueue<T>();
-		private IHandle<T> handler;
+		private readonly ConcurrentQueue<T> queuedMessages = new ConcurrentQueue<T>();
+		private readonly IHandle<T> handler;
 		private readonly string name;
 		private volatile bool canceled;
 

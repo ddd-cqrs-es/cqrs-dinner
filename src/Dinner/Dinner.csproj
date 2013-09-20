@@ -48,6 +48,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Actors.cs" />
+    <Compile Include="AlarmClock.cs" />
     <Compile Include="Handlers.cs" />
     <Compile Include="Messages.cs" />
     <Compile Include="MidgetHouse.cs" />
