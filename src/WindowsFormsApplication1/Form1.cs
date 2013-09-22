@@ -12,23 +12,29 @@ namespace WindowsFormsApplication1
 {
 	using System.Collections.Concurrent;
 	using System.Threading;
-	
+	using Newtonsoft.Json.Linq;
+
 	public partial class Form1 : Form
 	{
-		private ConcurrentQueue<Tuple<string, string>> queue = new ConcurrentQueue<Tuple<string, string>>(); 
+		private ConcurrentQueue<Tuple<string, string>> queue = new ConcurrentQueue<Tuple<string, string>>();
+		private List<Appointment> serverAppointments;
+
 		public Form1()
 		{
 			InitializeComponent();
 
-			var t = new Thread(Poll);
-			t.Start();
+//			var t = new Thread(PollChat);
+//			t.Start();
+//
+//			var q = new Thread(PostChat);
+//			q.Start();
 
-			var q = new Thread(Post);
-			q.Start();
+			var tA = new Thread(PollAppointments);
+			tA.Start();
 
 		}
 
-		private void Post()
+		private void PostChat()
 		{
 			while (true)
 			{
@@ -45,7 +51,7 @@ namespace WindowsFormsApplication1
 			}
 		}
 
-		private void Poll()
+		private void PollChat()
 		{
 
 
@@ -72,6 +78,58 @@ namespace WindowsFormsApplication1
 			}
 
 		}
+
+		private void PollAppointments()
+		{
+			Uri last = null;
+
+			while (last == null)
+			{
+				last = EventStoreClient.GetLast(new Uri("http://ha.geteventstore.com:2113/streams/calendar-foo"));
+				if (last == null)
+				{
+					Thread.Sleep(5000);
+				}
+			}
+
+			while (true)
+			{
+				serverAppointments = new List<Appointment>();
+				var current = EventStoreClient.ReadPrevious(last, x => this.BeginInvoke(new Action(() => serverAppointments.Add(GetAppt(x)) )));
+
+				if (last == current)
+				{
+
+					this.BeginInvoke(new Action(() => serverAppTextBox.Clear()));
+					foreach (var appointement in serverAppointments)
+					{
+						this.BeginInvoke(new Action(() => serverAppTextBox.AppendText(string.Format("Date: {0} Duration: {1} User: {2}", appointement.DateTime, appointement.Duration, appointement.User))));
+
+
+					}
+
+					Thread.Sleep(10000);
+				}
+				last = current;
+
+			}
+
+
+
+		}
+
+		private Appointment GetAppt(string x)
+		{
+			JObject o = JObject.Parse(x);
+
+			DateTime date =(DateTime)o["dateTime"];
+			int dur = (int) o["duration"];
+			string user = (string) o["user"];
+			return  new Appointment{DateTime = date, Duration = dur, User = user};
+
+
+		}
+
 
 		void AddLine(string text)
 		{

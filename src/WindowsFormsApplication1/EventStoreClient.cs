@@ -104,5 +104,39 @@
 				response.Close();
 			}
 		}
+
+		public static void PostMessage(Appointment appointment)
+		{
+			var message = @"[{'eventType':'chatMessage', 'eventId' :
+				'" + Guid.NewGuid() + @"',
+				'data' :
+				{
+					'user': '" + appointment.User + @"',
+					'dateTime': '" + appointment.DateTime.ToString() + @"',
+					'duration':  '" + appointment.Duration + @"' 
+					}}]";
+			var request = WebRequest.Create("http://ha.geteventstore.com:2113/streams/calender-foo");
+			request.Method = "POST";
+			request.ContentType = "application/json";
+			request.ContentLength = message.Length;
+			using (var sw = new StreamWriter(request.GetRequestStream()))
+			{
+				sw.Write(message);
+			}
+			using (var response = request.GetResponse())
+			{
+				response.Close();
+			}
+		}
+
+	}
+
+	public class Appointment
+	{
+		public DateTime DateTime { get; set; }
+		public int Duration { get; set; }
+
+		public string User { get; set; }
+
 	}
 }
