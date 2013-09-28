@@ -23,14 +23,14 @@
 			var cookTtlGate = new TimeToLiveGate<CookFood>(cookDispatcher);
 			var cookQueudHandler = new QueuedHandler<CookFood>(cookTtlGate, "dispatcher");
 			var cookLimiter = new Limiter<CookFood>(cookQueudHandler);
-			var cookScrewsUp = new ScrewsUp<CookFood>(cookLimiter);
+			//var cookScrewsUp = new ScrewsUp<CookFood>(cookLimiter);
 
 			var alarmClock = new AlarmClock(d);
 
 			var messageMonitor = new MessageMonitor(d);
 
 			d.Subscribe(alarmClock);
-			d.Subscribe(cookScrewsUp);
+			d.Subscribe(cookLimiter);
 			d.Subscribe(ass);
 			d.Subscribe(cashier);
 			d.Subscribe(manager);
@@ -62,7 +62,7 @@
 			new Thread(TryPay).Start(cashier);
 
 			Random r = new Random();
-            for (int i = 0; i < 10000; i++)
+            for (int i = 0; i < 5; i++)
             {
 	            Guid orderNumber;
 	            if (r.Next()%2 == 0)
