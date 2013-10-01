@@ -4,6 +4,7 @@
 	using System.Collections.Generic;
 	using System.Linq;
 	using System.Threading;
+	using Messaging;
 
 	public class Manager : IHandle<OrderCompleted>
 	{
@@ -39,7 +40,7 @@
 			var order = ordersAwaitingPaymentByOrderNumber[orderNumber];
 			order.IsPaid = true;
 
-			dispatcher.Publish(new OrderPaid {CausationId = Guid.NewGuid(), CorolationId = order.Id, Order = order});
+			dispatcher.Handle(new OrderPaid {CausationId = Guid.NewGuid(), CorolationId = order.Id, Order = order});
 		}
 	}
 
@@ -108,7 +109,7 @@
 			}
 
 			Thread.Sleep(speed);
-			dispatcher.Publish(new FoodPrepared
+			dispatcher.Handle(new FoodPrepared
 				{
 					CausationId = message.Id,
 					CorolationId = message.CorolationId,
@@ -138,7 +139,7 @@
 			{
 				order.AddItem(item.Item1, item.Item2);
 			}
-			dispatcher.Publish(new OrderPlaced {Id = order.Id, CorolationId = order.Id, CausationId = Guid.Empty, Order = order});
+			dispatcher.Handle(new OrderPlaced {Id = order.Id, CorolationId = order.Id, CausationId = Guid.Empty, Order = order});
 			return order.Id;
 		}
 

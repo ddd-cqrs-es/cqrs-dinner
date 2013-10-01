@@ -51,7 +51,25 @@
     <Compile Include="AlarmClock.cs" />
     <Compile Include="Handlers.cs" />
     <Compile Include="Messages.cs" />
+    <Compile Include="Messaging\Combiner.cs" />
+    <Compile Include="Messaging\IAmMonitored.cs" />
+    <Compile Include="Messaging\IHandle.cs" />
+    <Compile Include="Messaging\IHaveTimeToLive.cs" />
+    <Compile Include="Messaging\IMessage.cs" />
+    <Compile Include="Messaging\Limiter.cs" />
+    <Compile Include="Messaging\Multiplexer.cs" />
+    <Compile Include="Messaging\Narrower.cs" />
+    <Compile Include="Messaging\QueuedHandler.cs" />
+    <Compile Include="Messaging\RoundRobinDispatcher.cs" />
+    <Compile Include="Messaging\ScrewsUp.cs" />
+    <Compile Include="Messaging\SmartDispatcher.cs" />
+    <Compile Include="Messaging\TimeToLiveGate.cs" />
+    <Compile Include="Messaging\Widener.cs" />
     <Compile Include="MidgetHouse.cs" />
+    <Compile Include="Monitoring\FilePerOrderMonitor.cs" />
+    <Compile Include="Monitoring\MessageMonitor.cs" />
+    <Compile Include="Monitoring\QueueMonitor.cs" />
+    <Compile Include="Order.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -60,6 +78,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="OrderDocument.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Garbage\Garbage.csproj">
+      <Project>{94179049-72A7-4AC6-B622-67CE9727FA66}</Project>
+      <Name>Garbage</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

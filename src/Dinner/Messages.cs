@@ -1,6 +1,7 @@
 ﻿namespace Dinner
 {
 	using System;
+	using Messaging;
 
 	public class WakeMeIn:IMessage
 	{

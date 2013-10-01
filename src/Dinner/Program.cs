@@ -3,6 +3,8 @@
 	using System;
 	using System.Collections.Concurrent;
 	using System.Threading;
+	using Messaging;
+	using Monitoring;
 
 	static class Program
     {
@@ -28,6 +30,7 @@
 			var alarmClock = new AlarmClock(d);
 
 			var messageMonitor = new MessageMonitor(d);
+			var fmm = new FilePerOrderMonitor(d);
 
 			d.Subscribe(alarmClock);
 			d.Subscribe(cookLimiter);
@@ -36,10 +39,12 @@
 			d.Subscribe(manager);
 			d.Subscribe<OrderPlaced>(messageMonitor);
 			d.Subscribe<DodgyOrderPlaced>(messageMonitor);
-
-			var cookQueudHandler1 = new QueuedHandler<CookFood>(new Cook(d, 10000), "c1");
+			d.Subscribe<OrderPlaced>(fmm);
+			d.Subscribe<DodgyOrderPlaced>(fmm);
+			
+			var cookQueudHandler1 = new QueuedHandler<CookFood>(new Cook(d, 500), "c1");
 			cookDispatcher.AddHandler(cookQueudHandler1);
-			var cookQueudHandler2 = new QueuedHandler<CookFood>(new Cook(d, 1000), "c2");
+			var cookQueudHandler2 = new QueuedHandler<CookFood>(new Cook(d, 200), "c2");
 			cookDispatcher.AddHandler(cookQueudHandler2);
 			var cookQueudHandler3 = new QueuedHandler<CookFood>(new Cook(d, 100), "c3");	
 			cookDispatcher.AddHandler(cookQueudHandler3);
@@ -56,6 +61,7 @@
 			cookQueudHandler2.Start();
 			cookQueudHandler3.Start();
 			cookQueudHandler.Start();
+			d.Start();
 			alarmClock.Start();
 			queueMonitor.Start();
 			
@@ -67,7 +73,7 @@
 	            Guid orderNumber;
 	            if (r.Next()%2 == 0)
 				{
-					orderNumber = waiter.PlaceOrder(new[] {Tuple.Create("Burger", 1)}, 15);
+					orderNumber = waiter.PlaceDodgyOrder(new[] {Tuple.Create("Burger", 1)}, 15);
 
 				}
 				else

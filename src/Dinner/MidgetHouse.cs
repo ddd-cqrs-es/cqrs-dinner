@@ -2,15 +2,16 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using Messaging;
 
 	public class MidgetHouse: IHandle<OrderPlaced>, IHandle<DodgyOrderPlaced>, IHandle<OrderCompleted>
 	{
 		private readonly Dictionary<Guid,IMidget> midgets = new Dictionary<Guid, IMidget>();
 		private readonly Dispatcher dispatcher;
 
-		public MidgetHouse(Dispatcher dispatcher)
+		public MidgetHouse(Dispatcher dispatcher )
 		{
-			this.dispatcher = dispatcher;
+			this.dispatcher = dispatcher;	
 		}
 
 		public void Handle(DodgyOrderPlaced m)
@@ -68,29 +69,29 @@
 		public void Handle(FoodPrepared message)
 		{
 			foodPrepared = true;
-			dispatcher.Publish(new OrderCompleted() { CausationId = message.Id, CorolationId = message.CorolationId, Order = message.Order });
+			dispatcher.Handle(new OrderCompleted() { CausationId = message.Id, CorolationId = message.CorolationId, Order = message.Order });
 		}
 
 		public void Handle(OrderPriced message)
 		{
-			dispatcher.Publish(new PrepareForPayment() { CausationId = message.Id, CorolationId = message.CorolationId, Order = message.Order });
+			dispatcher.Handle(new PrepareForPayment() { CausationId = message.Id, CorolationId = message.CorolationId, Order = message.Order });
 		}
 
 		public void Handle(OrderPaid message)
 		{
-			dispatcher.Publish(new WakeMeIn(){ CausationId= message.Id, CorolationId = message.CorolationId, TTL = 3, Message =  new CookingTimedOut(){CausationId = message.Id, CorolationId= message.CorolationId, Order = message.Order}});
-			dispatcher.Publish(new CookFood() { CausationId = message.Id, CorolationId = message.CorolationId, Order = message.Order, TTL = message.Order.TTL});
+			dispatcher.Handle(new WakeMeIn(){ CausationId= message.Id, CorolationId = message.CorolationId, TTL = 3, Message =  new CookingTimedOut(){CausationId = message.Id, CorolationId= message.CorolationId, Order = message.Order}});
+			dispatcher.Handle(new CookFood() { CausationId = message.Id, CorolationId = message.CorolationId, Order = message.Order, TTL = message.Order.TTL});
 		}
 
 		public void Handle(DodgyOrderPlaced message)
 		{
-			dispatcher.Publish(new PriceOrder() { CausationId = message.Id, CorolationId = message.CorolationId, Order = message.Order });
+			dispatcher.Handle(new PriceOrder() { CausationId = message.Id, CorolationId = message.CorolationId, Order = message.Order });
 		}
 
 		public void Handle(CookingTimedOut message)
 		{
 			if(!foodPrepared)
-				dispatcher.Publish(new CookFood{CausationId = message.Id, CorolationId =  message.CorolationId, Order = message.Order});
+				dispatcher.Handle(new CookFood{CausationId = message.Id, CorolationId =  message.CorolationId, Order = message.Order});
 		}
 	}
 
@@ -122,29 +123,29 @@
 		public void Handle(FoodPrepared message)
 		{
 			foodPrepared = true;
-			dispatcher.Publish(new PriceOrder{CausationId= message.Id, CorolationId = message.CorolationId, Order = message.Order});	
+			dispatcher.Handle(new PriceOrder{CausationId= message.Id, CorolationId = message.CorolationId, Order = message.Order});	
 		}
 
 		public void Handle(OrderPriced message)
 		{
-			dispatcher.Publish(new PrepareForPayment() { CausationId = message.Id, CorolationId = message.CorolationId, Order = message.Order });		
+			dispatcher.Handle(new PrepareForPayment() { CausationId = message.Id, CorolationId = message.CorolationId, Order = message.Order });		
 		}
 
 		public void Handle(OrderPaid message)
 		{
-			dispatcher.Publish(new OrderCompleted() { CausationId = message.Id, CorolationId = message.CorolationId, Order = message.Order });		
+			dispatcher.Handle(new OrderCompleted() { CausationId = message.Id, CorolationId = message.CorolationId, Order = message.Order });		
 		}
 
 		public void Handle(OrderPlaced message)
 		{
-			dispatcher.Publish(new WakeMeIn() { CausationId = message.Id, CorolationId = message.CorolationId, TTL = 3, Message = new CookingTimedOut() { CausationId = message.Id, CorolationId = message.CorolationId, Order = message.Order } });
-			dispatcher.Publish(new CookFood() { CausationId = message.Id, CorolationId = message.CorolationId, Order = message.Order, TTL = message.TTL});		
+			dispatcher.Handle(new WakeMeIn() { CausationId = message.Id, CorolationId = message.CorolationId, TTL = 3, Message = new CookingTimedOut() { CausationId = message.Id, CorolationId = message.CorolationId, Order = message.Order } });
+			dispatcher.Handle(new CookFood() { CausationId = message.Id, CorolationId = message.CorolationId, Order = message.Order, TTL = message.TTL});		
 		}
 
 		public void Handle(CookingTimedOut message)
 		{
 			if (!foodPrepared)
-				dispatcher.Publish(new CookFood { CausationId = message.Id, CorolationId = message.CorolationId, Order = message.Order });
+				dispatcher.Handle(new CookFood { CausationId = message.Id, CorolationId = message.CorolationId, Order = message.Order });
 		}
 	}
 }
