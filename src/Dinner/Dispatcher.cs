@@ -7,11 +7,16 @@
 	{
 
 		private readonly Dictionary<string, Multiplexer<IMessage>> topics = new Dictionary<string, Multiplexer<IMessage>>();
-		private readonly QueuedHandler<IMessage> handler;
+		private readonly QueuedHandler<IMessage> queudHandler;
 
 		public Dispatcher()
 		{
-			handler = new QueuedHandler<IMessage>( new Handler(topics), "dispatcher");
+			queudHandler = new QueuedHandler<IMessage>( new Handler(topics), "dispatcher");
+		}
+
+		public QueuedHandler<IMessage> QueudHandler
+		{
+			get { return queudHandler; }
 		}
 
 		private void Publish<T>(string topic, T message) where T : IMessage
@@ -22,12 +27,12 @@
 			}
 			var corolationTopic = message.CorolationId.ToString();
 			if(topics.ContainsKey(corolationTopic))
-			topics[corolationTopic].Handle(message);
+				topics[corolationTopic].Handle(message);
 		}
 
 		public void Publish<T>(T message) where T : IMessage
 		{
-			handler.Handle(message);
+			QueudHandler.Handle(message);
 			//Publish(message.GetType().Name, message);
 		}
 
@@ -84,7 +89,7 @@
 
 		public void Start()
 		{
-			handler.Start();
+			QueudHandler.Start();
 		}
 	}
 }

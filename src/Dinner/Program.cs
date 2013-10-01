@@ -23,7 +23,7 @@
 
 			var cookDispatcher = new SmartDispatcher<CookFood>();
 			var cookTtlGate = new TimeToLiveGate<CookFood>(cookDispatcher);
-			var cookQueudHandler = new QueuedHandler<CookFood>(cookTtlGate, "dispatcher");
+			var cookQueudHandler = new QueuedHandler<CookFood>(cookTtlGate, "cook ttl gate");
 			var cookLimiter = new Limiter<CookFood>(cookQueudHandler);
 			//var cookScrewsUp = new ScrewsUp<CookFood>(cookLimiter);
 
@@ -42,21 +42,21 @@
 			d.Subscribe<OrderPlaced>(fmm);
 			d.Subscribe<DodgyOrderPlaced>(fmm);
 			
-			var cookQueudHandler1 = new QueuedHandler<CookFood>(new Cook(d, 500), "c1");
+			var cookQueudHandler1 = new QueuedHandler<CookFood>(new Cook(d, 10000), "c1");
 			cookDispatcher.AddHandler(cookQueudHandler1);
-			var cookQueudHandler2 = new QueuedHandler<CookFood>(new Cook(d, 200), "c2");
+			var cookQueudHandler2 = new QueuedHandler<CookFood>(new Cook(d, 5000), "c2");
 			cookDispatcher.AddHandler(cookQueudHandler2);
 			var cookQueudHandler3 = new QueuedHandler<CookFood>(new Cook(d, 100), "c3");	
 			cookDispatcher.AddHandler(cookQueudHandler3);
 
 
-			var queueMonitor = new QueueMonitor(new[] {cookQueudHandler1, cookQueudHandler2, cookQueudHandler3, cookQueudHandler});
+			var queueMonitor = new QueueMonitor(new IAmMonitored[] {cookQueudHandler1, cookQueudHandler2, cookQueudHandler3, cookQueudHandler,d.QueudHandler});
 			
 
 
             //Cook cook = new Cook(ass);
             var waiter = new Waiter(d);
-
+			
 			cookQueudHandler1.Start();
 			cookQueudHandler2.Start();
 			cookQueudHandler3.Start();
@@ -68,7 +68,7 @@
 			new Thread(TryPay).Start(cashier);
 
 			Random r = new Random();
-            for (int i = 0; i < 5; i++)
+            for (int i = 0; i < 500; i++)
             {
 	            Guid orderNumber;
 	            if (r.Next()%2 == 0)
@@ -78,8 +78,10 @@
 				}
 				else
 				{
-					orderNumber = waiter.PlaceDodgyOrder(new[] { Tuple.Create("Burger", 1) }, 15);
+					orderNumber = waiter.PlaceOrder(new[] { Tuple.Create("Burger", 1) }, 15);
 				}
+
+				if(i > 2)Thread.Sleep(2000);
 
 	            orders.TryAdd(orderNumber, null);
 		    }

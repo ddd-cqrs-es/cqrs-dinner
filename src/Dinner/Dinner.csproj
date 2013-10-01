@@ -49,7 +49,7 @@
   <ItemGroup>
     <Compile Include="Actors.cs" />
     <Compile Include="AlarmClock.cs" />
-    <Compile Include="Handlers.cs" />
+    <Compile Include="Dispatcher.cs" />
     <Compile Include="Messages.cs" />
     <Compile Include="Messaging\Combiner.cs" />
     <Compile Include="Messaging\IAmMonitored.cs" />
