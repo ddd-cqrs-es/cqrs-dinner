@@ -1,8 +1,7 @@
 ﻿namespace stoplosskata.lessstate
 {
-
-
-		using System.Collections.Generic;
+	using System;
+	using System.Collections.Generic;
 		using NUnit.Framework;
 		using System.Linq;
 
@@ -83,18 +82,43 @@
 				processManager.Handle(new PositionAcquired { Price = 1, Symbol = "ABC" });
 				processManager.Handle(new PriceChanged { Symbol = "ABC", Price = 1.01m });
 
-				var fisrt = (WakeMeUpIn15Seconds)bus.PublishedMessages[0];
-				var second = (WakeMeUpIn20Seconds)bus.PublishedMessages[1];
+				//var fisrt = (WakeMeUpIn15Seconds)bus.PublishedMessages[0];
+				var second = (WakeMeUpIn20Seconds)bus.PublishedMessages[0];
 
 				bus.PublishedMessages.Clear();
 
-				processManager.Handle((ShouldWeSell)fisrt.Message);
+				//processManager.Handle((ShouldWeSell)fisrt.Message);
 				processManager.Handle((ShouldWeMoveTriggerPrice)second.Message);
 
 				Assert.That(bus.PublishedMessages.Count, Is.EqualTo(1));
 				var triggerValueRaised = (TriggerValueRaised)bus.PublishedMessages[0];
 				Assert.That(triggerValueRaised.TriggerValue, Is.EqualTo(0.91m));
 			}
+
+			[Test]
+			public void When_high_price_is_sustained_with_a_dip_trigger_value_goes_up()
+			{
+				var bus = new FakeBus();
+				var processManager = new StoplossProcessManager(bus);
+				processManager.Handle(new PositionAcquired { Price = 1, Symbol = "ABC" });
+				processManager.Handle(new PriceChanged { Symbol = "ABC", Price = 1.1m });
+				processManager.Handle(new PriceChanged { Symbol = "ABC", Price = 1.2m });
+				processManager.Handle(new PriceChanged { Symbol = "ABC", Price = 1.15m });
+
+
+				//var fisrt = (WakeMeUpIn15Seconds)bus.PublishedMessages[0];
+				var second = (WakeMeUpIn20Seconds)bus.PublishedMessages[0];
+
+				bus.PublishedMessages.Clear();
+
+				//processManager.Handle((ShouldWeSell)fisrt.Message);
+				processManager.Handle((ShouldWeMoveTriggerPrice)second.Message);
+
+				Assert.That(bus.PublishedMessages.Count, Is.EqualTo(1));
+				var triggerValueRaised = (TriggerValueRaised)bus.PublishedMessages[0];
+				Assert.That(triggerValueRaised.TriggerValue, Is.EqualTo(1.0m));
+			}
+
 
 			[Test]
 			public void When_high_price_is_not_sustained_trigger_stays_the_same()
@@ -105,13 +129,13 @@
 				processManager.Handle(new PriceChanged { Symbol = "ABC", Price = 1.01m });
 				processManager.Handle(new PriceChanged { Symbol = "ABC", Price = 0.99m });
 
-				var fisrt = (WakeMeUpIn15Seconds)bus.PublishedMessages[0];
-				var second = (WakeMeUpIn20Seconds)bus.PublishedMessages[1];
+				var fisrt = (WakeMeUpIn20Seconds)bus.PublishedMessages[0];
+				//var second = (WakeMeUpIn20Seconds)bus.PublishedMessages[1];
 
 				bus.PublishedMessages.Clear();
 
-				processManager.Handle((ShouldWeSell)fisrt.Message);
-				processManager.Handle((ShouldWeMoveTriggerPrice)second.Message);
+				//processManager.Handle((ShouldWeSell)fisrt.Message);
+				processManager.Handle((ShouldWeMoveTriggerPrice)fisrt.Message);
 
 				Assert.That(bus.PublishedMessages.Count, Is.EqualTo(0));
 			}
@@ -154,12 +178,10 @@
 			}
 			private readonly IBus bus;
 			private decimal stopLossPrice;
-			private List<decimal> sellList = new List<decimal>();
-			private List<decimal> moveList = new List<decimal>();
 			private decimal initialDelta;
 			private State state = State.Even;
-			private decimal previousPrice;
 			private decimal currentPrice;
+			private decimal dipPrice;
 
 			public StoplossProcessManager(IBus bus)
 			{
@@ -176,38 +198,46 @@
 			public void Handle(PriceChanged message)
 			{
 				if (state == State.Completed) return;
+
+				if (message.Price < dipPrice) dipPrice = Math.Max(me) canMoveUp = false;
+				if (message.Price > stopLossPrice) canSell = false;
 				
-				currentPrice = message.Price;
-				var direction = message.Price > currentPrice ? State.Up : (message.Price < currentPrice ? State.Down : State.Even);
-				
+				if (message.Price < stopLossPrice)
+				{
+					Publish(new WakeMeUpIn15Seconds { Message = new ShouldWeSell { Price = message.Price, Symbol = message.Symbol } });
 					
-				Publish(new WakeMeUpIn15Seconds { Message = new ShouldWeSell { Direction = direction,   Price = message.Price, Symbol = message.Symbol } });
-				Publish(new WakeMeUpIn20Seconds { Message = new ShouldWeMoveTriggerPrice() { Direction = direction, Price = message.Price, Symbol = message.Symbol } });
+				}
+				if (message.Price > currentPrice)
+				{
+					Publish(new WakeMeUpIn20Seconds { Message = new ShouldWeMoveTriggerPrice() { Price = message.Price, Symbol = message.Symbol } });
+				}
+
 			}
 
 			public void Handle(ShouldWeSell message)
 			{
 				if (state == State.Completed) return;
 
-				if (sellList.All(x => x < stopLossPrice))
+				if (canSell)
 				{
 					bus.Send(new SellPosition { Price = message.Price, Symbol = message.Symbol });
-					state= State.Completed;
+					state = State.Completed;
+				
 				}
-				sellList.Remove(message.Price);
 			}
 
 			public void Handle(ShouldWeMoveTriggerPrice message)
 			{
 				if (state == State.Completed) return;
-				if (moveList.All(x => x >= message.Price))
+				
+				if (dipPrice < message.Price)
 				{
-
 					stopLossPrice = message.Price - initialDelta;
-
+					canMoveUp = true;
+					canSell = true;
 					bus.Publish(new TriggerValueRaised() { TriggerValue = stopLossPrice });
+					
 				}
-				moveList.Remove(message.Price);
 			}
 
 			private void Publish(IMessage message)
@@ -245,7 +275,6 @@
 		{
 			public decimal Price;
 			public string Symbol;
-			public StoplossProcessManager.State Direction;
 		}
 
 		public class ShouldWeMoveTriggerPrice : IMessage
