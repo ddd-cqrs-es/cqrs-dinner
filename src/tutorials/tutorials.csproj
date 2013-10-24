@@ -48,7 +48,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ThreadTests\BackgroundWorkerSamples.cs" />
+    <Compile Include="ThreadTests\BackgroundWorkerSamples.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="ThreadTests\Cancellation_token_sample.cs" />
     <Compile Include="ThreadTests\EventBasedAsyncTests.cs" />
     <Compile Include="ThreadTests\InterruptAbortSample.cs" />
     <Compile Include="ThreadTests\LazySample.cs" />
@@ -56,6 +59,7 @@
     <Compile Include="ThreadTests\ThreadCancellationSample.cs" />
     <Compile Include="ThreadTests\ThreadLocalStorageSample.cs" />
     <Compile Include="ThreadTests\ThreadTest.cs" />
+    <Compile Include="ThreadTests\TimerSamples.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
