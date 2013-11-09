@@ -40,7 +40,7 @@
 			var order = ordersAwaitingPaymentByOrderNumber[orderNumber];
 			order.IsPaid = true;
 
-			dispatcher.Handle(new OrderPaid {CausationId = Guid.NewGuid(), CorolationId = order.Id, Order = order});
+			dispatcher.Handle(new OrderPaid {CausationId = Guid.NewGuid(), CorrelationId = order.Id, Order = order});
 		}
 	}
 
@@ -75,7 +75,7 @@
 			order.SubTotal = order.Items.Sum(i => i.Price);
 			order.Total = order.SubTotal + (order.SubTotal*taxRate);
 
-			dispatcher.Publish(new OrderPriced {CausationId = message.Id, CorolationId = message.CorolationId, Order = order});
+			dispatcher.Publish(new OrderPriced {CausationId = message.Id, CorrelationId = message.CorrelationId, Order = order});
 		}
 	}
 
@@ -112,7 +112,7 @@
 			dispatcher.Handle(new FoodPrepared
 				{
 					CausationId = message.Id,
-					CorolationId = message.CorolationId,
+					CorrelationId = message.CorrelationId,
 					Order = message.Order
 				});
 		}
@@ -139,7 +139,7 @@
 			{
 				order.AddItem(item.Item1, item.Item2);
 			}
-			dispatcher.Handle(new OrderPlaced {Id = order.Id, CorolationId = order.Id, CausationId = Guid.Empty, Order = order});
+			dispatcher.Handle(new OrderPlaced {Id = order.Id, CorrelationId = order.Id, CausationId = Guid.Empty, Order = order});
 			return order.Id;
 		}
 
@@ -154,7 +154,7 @@
 			{
 				order.AddItem(item.Item1, item.Item2);
 			}
-			dispatcher.Publish(new DodgyOrderPlaced() { Id = order.Id, CorolationId = order.Id, CausationId = Guid.Empty, Order = order });
+			dispatcher.Publish(new DodgyOrderPlaced() { Id = order.Id, CorrelationId = order.Id, CausationId = Guid.Empty, Order = order });
 			return order.Id;
 		}
 	}

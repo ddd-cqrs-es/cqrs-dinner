@@ -15,25 +15,25 @@
 
 		public void Handle(IMessage message)
 		{
-			Console.WriteLine("CoId:{2}  Message:{3}\t Id:{0} CaId:{1}", message.Id, message.CausationId, message.CorolationId, message);
+			Console.WriteLine("CoId:{2}  Message:{3}\t Id:{0} CaId:{1}", message.Id, message.CausationId, message.CorrelationId, message);
 		}
 
 		public void Handle(OrderPlaced message)
 		{
-			d.Subscribe<IMessage>(this, message.CorolationId.ToString());
-			d.Subscribe<OrderCompleted>(this, message.CorolationId.ToString());
+			d.Subscribe<IMessage>(this, message.CorrelationId.ToString());
+			d.Subscribe<OrderCompleted>(this, message.CorrelationId.ToString());
 		}
 
 		public void Handle(DodgyOrderPlaced message)
 		{
-			d.Subscribe<IMessage>(this, message.CorolationId.ToString());
-			d.Subscribe<OrderCompleted>(this, message.CorolationId.ToString());
+			d.Subscribe<IMessage>(this, message.CorrelationId.ToString());
+			d.Subscribe<OrderCompleted>(this, message.CorrelationId.ToString());
 
 		}
 
 		public void Handle(OrderCompleted message)
 		{
-			d.Unsubscribe<IMessage>(this, message.CorolationId.ToString());
+			d.Unsubscribe<IMessage>(this, message.CorrelationId.ToString());
 		}
 	}
 }

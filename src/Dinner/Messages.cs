@@ -12,7 +12,7 @@
 
 		public Guid Id { get;  set; }
 		public Guid CausationId { get; set; }
-		public Guid CorolationId { get; set; }
+		public Guid CorrelationId { get; set; }
 		public IMessage Message { get; set; }
 
 		public int TTL { get; set; }
@@ -27,7 +27,7 @@
 
 		public Guid Id { get; set; }
 		public Guid CausationId { get; set; }
-		public Guid CorolationId { get; set; }
+		public Guid CorrelationId { get; set; }
 
 		public Order Order { get; set; }
 	}
@@ -42,7 +42,7 @@
 		public Order Order { get; set; }
 		public Guid Id { get; private set; }
 		public Guid CausationId { get; set; }
-		public Guid CorolationId { get; set; }
+		public Guid CorrelationId { get; set; }
 	}
 
 	public class PrepareForPayment:IMessage
@@ -54,7 +54,7 @@
 
 		public Guid Id { get; private set; }
 		public Guid CausationId { get; set; }
-		public Guid CorolationId { get; set; }
+		public Guid CorrelationId { get; set; }
 
 		public Order Order { get; set; }
 	}
@@ -69,7 +69,7 @@
 		public Order Order { get; set; }
 		public Guid Id { get; private set; }
 		public Guid CausationId { get; set; }
-		public Guid CorolationId { get; set; }
+		public Guid CorrelationId { get; set; }
 	}
 
 	public class CookFood : IMessage, IHaveTimeToLive
@@ -82,7 +82,7 @@
 
 		public Guid Id { get;  set; }
 		public Guid CausationId { get;  set; }
-		public Guid CorolationId { get;  set; }
+		public Guid CorrelationId { get;  set; }
 		public Order Order { get; set; }
 		
 		public override string ToString()
@@ -101,7 +101,7 @@
 		}
 
 		public Guid CausationId { get; set; }
-		public Guid CorolationId { get; set; }
+		public Guid CorrelationId { get; set; }
 		public Order Order;
 		public Guid Id { get; private set; }
 
@@ -116,7 +116,7 @@
 		public OrderPlaced()
 		{
 			Id = Guid.NewGuid();
-			CorolationId = Id;
+			CorrelationId = Id;
 		}
 
 		public override string ToString()
@@ -125,7 +125,7 @@
 		}
 
 		public Guid CausationId { get; set; }
-		public Guid CorolationId { get; set; }
+		public Guid CorrelationId { get; set; }
 		public Order Order;
 		public Guid Id { get; set; }
 
@@ -143,7 +143,7 @@
 		}
 
 		public Guid CausationId { get; set; }
-		public Guid CorolationId { get; set; }
+		public Guid CorrelationId { get; set; }
 		public Guid Id { get; private set; }
 		public Order Order;
 
@@ -161,7 +161,7 @@
 		}
 
 		public Guid CausationId { get; set; }
-		public Guid CorolationId { get; set; }
+		public Guid CorrelationId { get; set; }
 		public Order Order;
 		public Guid Id { get; private set; }
 

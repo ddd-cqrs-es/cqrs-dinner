@@ -20,12 +20,12 @@
 		{
 			StreamWriter sw;
 
-			while (!files.TryGetValue(message.CorolationId, out sw))
+			while (!files.TryGetValue(message.CorrelationId, out sw))
 			{
 				
 			}
 			;
-			sw.WriteLine("CoId:{2}  Message:{3}\t Id:{0} CaId:{1}", message.Id, message.CausationId, message.CorolationId, message);
+			sw.WriteLine("CoId:{2}  Message:{3}\t Id:{0} CaId:{1}", message.Id, message.CausationId, message.CorrelationId, message);
 		}
 
 		public void Handle(OrderPlaced message)
@@ -34,17 +34,17 @@
 			if (!Directory.Exists(directory))
 				Directory.CreateDirectory(directory);
 			
-			string fileName = "Dinner\\" + message.CorolationId.ToString() + ".log";
+			string fileName = "Dinner\\" + message.CorrelationId.ToString() + ".log";
 			var fileStream =
 				new StreamWriter(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), fileName), false);
 
-			while (!files.TryAdd(message.CorolationId, fileStream))
+			while (!files.TryAdd(message.CorrelationId, fileStream))
 			{
 				
 			}
 			
-			d.Subscribe<IMessage>(this, message.CorolationId.ToString());
-			d.Subscribe<OrderCompleted>(this, message.CorolationId.ToString());
+			d.Subscribe<IMessage>(this, message.CorrelationId.ToString());
+			d.Subscribe<OrderCompleted>(this, message.CorrelationId.ToString());
 		}
 
 		public void Handle(DodgyOrderPlaced message)
@@ -52,27 +52,27 @@
 			string directory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Dinner");
 			if(!Directory.Exists(directory))
 				Directory.CreateDirectory(directory);
-			string fileName = "Dinner\\" + message.CorolationId.ToString() + ".log";
+			string fileName = "Dinner\\" + message.CorrelationId.ToString() + ".log";
 			var fileStream =
 				new StreamWriter(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), fileName), false);
 
-			while (!files.TryAdd(message.CorolationId, fileStream))
+			while (!files.TryAdd(message.CorrelationId, fileStream))
 			{
 				
 			}
 			
 
-			d.Subscribe<IMessage>(this, message.CorolationId.ToString());
-			d.Subscribe<OrderCompleted>(this, message.CorolationId.ToString());
+			d.Subscribe<IMessage>(this, message.CorrelationId.ToString());
+			d.Subscribe<OrderCompleted>(this, message.CorrelationId.ToString());
 
 		}
 
 		public void Handle(OrderCompleted message)
 		{
 			StreamWriter streamWriter;
-			files.TryRemove(message.CorolationId,out streamWriter);
+			files.TryRemove(message.CorrelationId,out streamWriter);
 			streamWriter.Close();
-			d.Unsubscribe<IMessage>(this, message.CorolationId.ToString());
+			d.Unsubscribe<IMessage>(this, message.CorrelationId.ToString());
 		}
 	}
 }

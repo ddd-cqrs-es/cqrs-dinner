@@ -6,6 +6,6 @@
 	{
 		Guid Id { get; }
 		Guid CausationId { get; }
-		Guid CorolationId { get; }
+		Guid CorrelationId { get; }
 	}
 }

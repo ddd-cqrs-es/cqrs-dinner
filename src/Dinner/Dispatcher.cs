@@ -25,7 +25,7 @@
 			{
 				topics[topic].Handle(message);
 			}
-			var corolationTopic = message.CorolationId.ToString();
+			var corolationTopic = message.CorrelationId.ToString();
 			if(topics.ContainsKey(corolationTopic))
 				topics[corolationTopic].Handle(message);
 		}
@@ -81,7 +81,7 @@
 				{
 					topics[topic].Handle(message);
 				}
-				var corolationTopic = message.CorolationId.ToString();
+				var corolationTopic = message.CorrelationId.ToString();
 				if (topics.ContainsKey(corolationTopic))
 					topics[corolationTopic].Handle(message);
 			}

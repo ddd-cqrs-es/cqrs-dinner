@@ -23,7 +23,7 @@
 
 		public int TableNumber
 		{
-			get { return (int) json["v"]; }
+			get { return (int)json["TableNumber"]; }
 			set { json["TableNumber"] = value; }
 		}
 
