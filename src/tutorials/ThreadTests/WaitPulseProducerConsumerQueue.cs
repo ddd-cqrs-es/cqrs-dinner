@@ -14,14 +14,15 @@
 			var queue = new WaitPulseProducerConsumerQueue(3);
 			var random = new Random(DateTime.Now.Millisecond);
 			Console.WriteLine("Enqueuing 10 items");
-			for (int i = 0; i < 100; i++)
+			for (var i = 0; i < 100; i++)
 			{
-				int itemNumber = i;
-				queue.EnqueueItem(()=>{
-					                      int millisecondsTimeout = (itemNumber%5)*1000;
-					                      Thread.Sleep(millisecondsTimeout);
-					Console.WriteLine(" Task " + itemNumber + " slept " + millisecondsTimeout + " ms");
-				});
+				var itemNumber = i;
+				queue.EnqueueItem(() =>
+					{
+						var millisecondsTimeout = (itemNumber%5)*1000;
+						Thread.Sleep(millisecondsTimeout);
+						Console.WriteLine(" Task " + itemNumber + " slept " + millisecondsTimeout + " ms");
+					});
 			}
 
 			queue.Shutdown(true);
@@ -33,18 +34,18 @@
 	public class WaitPulseProducerConsumerQueue
 	{
 		private readonly Thread[] workers;
-		private Queue<Action> queue= new Queue<Action>();
- 		private readonly object locker = new object();
+		private readonly Queue<Action> queue = new Queue<Action>();
+		private readonly object locker = new object();
 
 		public WaitPulseProducerConsumerQueue(int workerCount)
 		{
-			workers= new Thread[workerCount];
+			workers = new Thread[workerCount];
 
-			for (int i = 0; i < workerCount; i++)
+			for (var i = 0; i < workerCount; i++)
 			{
 				var thread = new Thread(Consume);
 				thread.Start(i);
-				workers[i]=thread;
+				workers[i] = thread;
 			}
 		}
 
@@ -55,19 +56,20 @@
 				Action action;
 				lock (locker)
 				{
-					while (queue.Count == 0) Monitor.Wait(locker); //this makes cunsumer pull  
-
-
+					while (queue.Count == 0)
+					{
+						Monitor.Wait(locker); //this makes cunsumer pull  
+					}
 					action = queue.Dequeue();
 				}
-				if(action == null) return;
-					Console.Write("Consumer " + data + " ");
-					action(); //invoke action
-				
+				if (action == null)
+				{
+					return;
+				}
+				Console.Write("Consumer " + data + " ");
+				action(); //invoke action
 			}
 		}
-
-		
 
 		public void Shutdown(bool waitForWorker)
 		{

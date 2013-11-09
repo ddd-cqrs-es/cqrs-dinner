@@ -195,8 +195,6 @@
 			{
 				
 				stopLossPrice = message.Price - initialDelta;
-
-				bus.Publish(new TriggerValueRaised(){TriggerValue = stopLossPrice});
 			}
 			moveList.Remove(message.Price);
 		}

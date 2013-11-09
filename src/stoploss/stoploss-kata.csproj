@@ -46,8 +46,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="LessState\MovingStoplossSpecs.cs" />
+    <Compile Include="LessState\StoplossProcess.cs" />
     <Compile Include="MovingStoploss.cs" />
-    <Compile Include="MovingStoplossLessState.cs" />
+    <Compile Include="LessState\Messages.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Specifications.cs" />
