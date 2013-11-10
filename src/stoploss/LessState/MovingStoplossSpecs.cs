@@ -80,12 +80,12 @@
 			processManager.Handle(new PositionAcquired { Price = 1, Symbol = "ABC" });
 			processManager.Handle(new PriceChanged { Symbol = "ABC", Price = 1.01m });
 
-			//var fisrt = (WakeMeUpIn15Seconds)bus.PublishedMessages[0];
-			var second = (WakeMeUpIn20Seconds)bus.PublishedMessages[0];
+			var fisrt = (WakeMeUpIn15Seconds)bus.PublishedMessages[0];
+			var second = (WakeMeUpIn20Seconds)bus.PublishedMessages[1];
 
 			bus.PublishedMessages.Clear();
 
-			//processManager.Handle((ShouldWeSell)fisrt.Message);
+			processManager.Handle((ShouldWeSell)fisrt.Message);
 			processManager.Handle((ShouldWeMoveTriggerPrice)second.Message);
 
 			Assert.That(bus.PublishedMessages.Count, Is.EqualTo(1));
@@ -104,12 +104,12 @@
 			processManager.Handle(new PriceChanged { Symbol = "ABC", Price = 1.15m });
 
 
-			//var fisrt = (WakeMeUpIn15Seconds)bus.PublishedMessages[0];
-			var second = (WakeMeUpIn20Seconds)bus.PublishedMessages[0];
+			var fisrt = (WakeMeUpIn15Seconds)bus.PublishedMessages[0];
+			var second = (WakeMeUpIn20Seconds)bus.PublishedMessages[1];
 
 			bus.PublishedMessages.Clear();
 
-			//processManager.Handle((ShouldWeSell)fisrt.Message);
+			processManager.Handle((ShouldWeSell)fisrt.Message);
 			processManager.Handle((ShouldWeMoveTriggerPrice)second.Message);
 
 			Assert.That(bus.PublishedMessages.Count, Is.EqualTo(1));
@@ -125,21 +125,23 @@
 			var bus = new FakeBus();
 			var processManager = new StoplossProcess(bus);
 			processManager.Handle(new PositionAcquired { Price = 1, Symbol = "ABC" });
-			processManager.Handle(new PriceChanged { Symbol = "ABC", Price = 0.9m });
+			processManager.Handle(new PriceChanged { Symbol = "ABC", Price = 0.89m });
 			processManager.Handle(new PriceChanged { Symbol = "ABC", Price = 0.8m });
 			processManager.Handle(new PriceChanged { Symbol = "ABC", Price = 0.85m });
 
 
-			var first = (WakeMeUpIn20Seconds)bus.PublishedMessages[0];
+			var fisrt = (WakeMeUpIn15Seconds)bus.PublishedMessages[0];
+
+			var second = (WakeMeUpIn15Seconds)bus.PublishedMessages[1];
 
 			bus.PublishedMessages.Clear();
 
-			//processManager.Handle((ShouldWeSell)fisrt.Message);
-			processManager.Handle((ShouldWeMoveTriggerPrice)first.Message);
+			processManager.Handle((ShouldWeSell)fisrt.Message);
+			processManager.Handle((ShouldWeSell)second.Message);
 
-			Assert.That(bus.PublishedMessages.Count, Is.EqualTo(1));
+			Assert.That(bus.SentMessages.Count, Is.EqualTo(1));
 			var sellPosition = (SellPosition)bus.SentMessages[0];
-			Assert.That(sellPosition.Price, Is.EqualTo(0.9m));
+			Assert.That(sellPosition.Price, Is.EqualTo(0.89m));
 		}
 
 		[Test]
@@ -156,7 +158,7 @@
 			processManager.Handle(new PriceChanged { Symbol = "ABC", Price = 1.27m });
 			processManager.Handle(new PriceChanged { Symbol = "ABC", Price = 1.27m });
 			
-			var wakeMeUpIn20Secondses = bus.PublishedMessages.Cast<WakeMeUpIn20Seconds>().Take(4).ToArray();
+			var wakeMeUpIn20Secondses = bus.PublishedMessages.OfType<WakeMeUpIn20Seconds>().Take(4).ToArray();
 
 			bus.PublishedMessages.Clear();
 
@@ -187,13 +189,14 @@
 			processManager.Handle(new PriceChanged { Symbol = "ABC", Price = 1.01m });
 			processManager.Handle(new PriceChanged { Symbol = "ABC", Price = 0.99m });
 
-			var fisrt = (WakeMeUpIn20Seconds)bus.PublishedMessages[0];
-			//var second = (WakeMeUpIn20Seconds)bus.PublishedMessages[1];
+			var fisrt = (WakeMeUpIn15Seconds)bus.PublishedMessages[0];
+			var second = (WakeMeUpIn20Seconds)bus.PublishedMessages[1];
+			
 
 			bus.PublishedMessages.Clear();
 
-			//processManager.Handle((ShouldWeSell)fisrt.Message);
-			processManager.Handle((ShouldWeMoveTriggerPrice)fisrt.Message);
+			processManager.Handle((ShouldWeSell)fisrt.Message);
+			processManager.Handle((ShouldWeMoveTriggerPrice)second.Message);
 
 			Assert.That(bus.PublishedMessages.Count, Is.EqualTo(0));
 		}

@@ -7,8 +7,7 @@
 	{
 		public enum Direction
 		{
-			Unknown,Even, Up, Down, Completed,
-				
+			Unknown,Even, Up, Down, Completed
 		}
 
 		private readonly IBus bus;
@@ -61,10 +60,9 @@
 				minima.Enqueue(lastPrice);
 				//we can already remove any minima that is 
 			}
-
+			//enqueue as minimum even values
 			if (direction == Direction.Even && (newstate == Direction.Even || newstate == Direction.Up))
 			{
-
 				minima.Enqueue(lastPrice);	
 			}
 
@@ -74,20 +72,21 @@
 				//current price is a mixima
 				maxima.Enqueue(lastPrice);
 			}
+			//enqueue as maximum even values
 			if (direction == Direction.Even && (newstate == Direction.Even || newstate == Direction.Down))
 			{
-				minima.Enqueue(lastPrice);
+				maxima.Enqueue(lastPrice);
 			}
-
 
 			//remember which way the price is going
 			direction = newstate;
 			lastPrice = message;
 
-			if (message.Price < stopLossPrice)
-			{
-				Publish(new WakeMeUpIn15Seconds { Message = new ShouldWeSell { PriceId = message.Id, Price = message.Price, Symbol = message.Symbol } });	
-			}
+			
+			
+			Publish(new WakeMeUpIn15Seconds { Message = new ShouldWeSell { PriceId = message.Id, Price = message.Price, Symbol = message.Symbol } });	
+			
+			//trigger price can't go down
 			if (message.Price > currentPrice)
 			{
 				Publish(new WakeMeUpIn20Seconds { Message = new ShouldWeMoveTriggerPrice() {PriceId = message.Id,  Price = message.Price, Symbol = message.Symbol } });
@@ -100,12 +99,45 @@
 			if (direction == Direction.Completed) return;
 
 			//remove
-			if (maxima.All(x => x.Price <= message.Price) && lastPrice.Price <= message.Price)
+			if (message.Price < stopLossPrice)
 			{
-				bus.Send(new SellPosition { Price = message.Price, Symbol = message.Symbol });
-				direction = Direction.Completed;
+				if (maxima.Count == 0)
+				{
+					var sell = false;
+					if (lastPrice.Id == message.PriceId)
+					{
+						sell = true;
+					}
+					else if (lastPrice.Price < message.Price)
+					{
+						sell = true;
+					}
+					if (sell)
+					{
+						bus.Send(new SellPosition { Price = message.Price, Symbol = message.Symbol });
+						direction = Direction.Completed;
+					}
+				}
+				else if (maxima.All(x => x.Price < message.Price))
+				{
+					var sell = false;
+					if (lastPrice.Id == message.PriceId)
+					{
+						sell = true;
+					}
+					else if (lastPrice.Price < message.Price)
+					{
+						sell = true;
+					}
+					if (sell)
+					{
+						bus.Send(new SellPosition {Price = message.Price, Symbol = message.Symbol});
+						direction = Direction.Completed;
+					}
+
+				}
 			}
-				
+
 			if(minima.Count == 0) return;
 			var priceChanged = minima.Peek();
 			if (priceChanged.Id == message.PriceId)
@@ -117,12 +149,16 @@
 		public void Handle(ShouldWeMoveTriggerPrice message)
 		{
 			if (direction == Direction.Completed) return;
-			if (minima.All(x => x.Price >= message.Price) && lastPrice.Price  >= message.Price)
-			{
-				stopLossPrice = message.Price - initialDelta;
-				currentPrice = message.Price;
-				bus.Publish(new TriggerValueRaised() { TriggerValue = stopLossPrice });
 
+			if (message.Price >= currentPrice)
+			{
+				if (minima.All(x => x.Price >= message.Price) && lastPrice.Price >= message.Price)
+				{
+					stopLossPrice = message.Price - initialDelta;
+					currentPrice = message.Price;
+					bus.Publish(new TriggerValueRaised() {TriggerValue = stopLossPrice});
+
+				}
 			}
 
 			if(minima.Count==0) return;
