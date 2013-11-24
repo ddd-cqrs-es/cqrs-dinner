@@ -61,6 +61,7 @@
     <Compile Include="ThreadTests\ThreadLocalStorageSample.cs" />
     <Compile Include="ThreadTests\ThreadTest.cs" />
     <Compile Include="ThreadTests\TimerSamples.cs" />
+    <Compile Include="ThreadTests\TwoWaySignaling.cs" />
     <Compile Include="ThreadTests\WaitAndPulseSamples.cs" />
     <Compile Include="ThreadTests\WaitPulseProducerConsumerQueue.cs" />
   </ItemGroup>
