@@ -56,6 +56,8 @@
     <Compile Include="ThreadTests\InterruptAbortSample.cs" />
     <Compile Include="ThreadTests\LazySample.cs" />
     <Compile Include="ThreadTests\MemoryBarriersSample.cs" />
+    <Compile Include="ThreadTests\SimulatingCountDownEvent.cs" />
+    <Compile Include="ThreadTests\SimulatingWaitHandles.cs" />
     <Compile Include="ThreadTests\SynchronizationTests.cs" />
     <Compile Include="ThreadTests\ThreadCancellationSample.cs" />
     <Compile Include="ThreadTests\ThreadLocalStorageSample.cs" />
