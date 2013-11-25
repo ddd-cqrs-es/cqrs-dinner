@@ -61,4 +61,34 @@
 			}
 		}
 	}
+
+	[TestFixture]
+	public class RendezVous
+	{
+		private static MyCountdownEvent coutdown = new MyCountdownEvent(2);
+
+		[Test]
+		public void Main()
+		{
+			var r = new Random();
+			new Thread(Dude).Start(r.Next(10000));
+			Thread.Sleep(r.Next(10000));
+
+			coutdown.Signal();
+			coutdown.Wait();
+
+			Console.WriteLine("Dude!");
+			
+		}
+
+		private void Dude(object delay)
+		{
+			Thread.Sleep((int)delay);
+			coutdown.Signal();
+			coutdown.Wait();
+
+			Console.WriteLine("I was waiting for you Dude!");
+
+		}
+	}
 }
