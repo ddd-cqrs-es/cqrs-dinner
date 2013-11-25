@@ -6,9 +6,25 @@
 	[TestFixture]
 	public class Age_calculation
 	{
+		public enum  Foo
+		{
+			Bar, Baz
+		}
+		[Test]
+		public void caps_in_enum()
+		{
+			Foo result;
+			var tryParse = Enum.TryParse<Foo>("bar", true, out result);
+
+			Assert.That(tryParse, Is.True);
+
+		}
+
 		[Test]
 		 public void Age_has_always_same_fraction_()
 		 {
+
+
 			 var ddn = new DateTime(1989, 5, 11);
 			 var ddrap = new DateTime(2044, 6, 1);
 			 var ddrsp = new DateTime(2054, 6, 1);
