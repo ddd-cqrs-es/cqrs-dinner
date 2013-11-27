@@ -24,9 +24,21 @@
 		{
 			for (int i = 0; i < 5; i++)
 			{
-				Console.WriteLine(id.ToString() + i + " ");
+				Console.Write(id.ToString() + i + " ");
 				barrier.SignalAndWait();
 			}
 		}
+
+		[Test]
+		public void Post_phase_action()
+		{
+			barrier = new Barrier(3, x=> Console.WriteLine());
+			new Thread(Speak).Start("A");
+			new Thread(Speak).Start("B");
+			new Thread(Speak).Start("C");
+
+
+		}
+
 	}
 }
