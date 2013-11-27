@@ -51,6 +51,7 @@
     <Compile Include="ThreadTests\BackgroundWorkerSamples.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="ThreadTests\BarrierSample.cs" />
     <Compile Include="ThreadTests\Cancellation_token_sample.cs" />
     <Compile Include="ThreadTests\EventBasedAsyncTests.cs" />
     <Compile Include="ThreadTests\InterruptAbortSample.cs" />
