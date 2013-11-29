@@ -57,6 +57,7 @@
     <Compile Include="ThreadTests\InterruptAbortSample.cs" />
     <Compile Include="ThreadTests\LazySample.cs" />
     <Compile Include="ThreadTests\MemoryBarriersSample.cs" />
+    <Compile Include="ThreadTests\ReaderWriterLockSlimSample.cs" />
     <Compile Include="ThreadTests\SimulatingCountDownEvent.cs" />
     <Compile Include="ThreadTests\SimulatingWaitHandles.cs" />
     <Compile Include="ThreadTests\SynchronizationTests.cs" />
