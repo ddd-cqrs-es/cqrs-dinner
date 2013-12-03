@@ -24,5 +24,69 @@
 			Console.WriteLine(t.ThreadState); //Aborted
 		}
  
+		[Test]
+		public void Thread_still_aborts_if_caught()
+		{
+			var t = new Thread(CatchThreadAbort);
+			t.Start();
+			t.Abort();
+			t.Join();
+
+			Assert.That(t.ThreadState == ThreadState.Aborted);
+		}
+
+		private void CatchThreadAbort()
+		{
+			while (true)
+			{
+				try
+				{
+					while (true)
+					{
+
+					}
+				}
+				catch (ThreadAbortException threadAbortException)
+				{
+					//do something usefull	
+				}
+			}
+		}
+
+		[Test]
+		public void Thread_wont_die()
+		{
+			var t = new Thread(IWillNotDie);
+			t.Start();
+			
+			Thread.Sleep(1000);
+			t.Abort();
+			Thread.Sleep(1000);
+			t.Abort();
+			Thread.Sleep(1000);
+			t.Abort();
+			
+			Assert.That(t.ThreadState == ThreadState.Running);
+				
+		}
+
+		private void IWillNotDie()
+		{
+			while (true)
+			{
+				try
+				{
+					while (true)
+					{
+
+					}
+				}
+				catch (ThreadAbortException threadAbortException)
+				{
+					Thread.ResetAbort();
+					Console.WriteLine("I wwill not die!");
+				}
+			}
+		}
 	}
 }
