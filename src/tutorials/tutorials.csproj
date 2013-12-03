@@ -48,6 +48,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ThreadTests\AbortSample.cs" />
     <Compile Include="ThreadTests\BackgroundWorkerSamples.cs">
       <SubType>Component</SubType>
     </Compile>
