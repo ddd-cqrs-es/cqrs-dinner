@@ -5,6 +5,7 @@
 	using System.IO;
 	using System.Linq;
 	using System.Net;
+	using System.Net.NetworkInformation;
 	using System.Reflection;
 	using NUnit.Framework;
 
@@ -111,6 +112,31 @@
 				Console.Write(i1 + " ");
 			}
 		}
+
+		[Test]
+		public void Blocking_calls()
+		{
+			var query =
+				from site in
+					new string[]
+						{
+							"www.albahari.com", "www.linqpad.net", "www.oreilly.com", "www.takeonit.com", "stackoverflow.com",
+							"www.rebeccarey.com", "1.1.1.1"
+						}.AsParallel().WithDegreeOfParallelism(6) //hint for io intensive call
+				let p = new Ping().Send(site)
+				select new PingResult{Site= site, Result = p.Status, Time = p.RoundtripTime};
+
+			query.Dump();
+
+			
+		}
+	}
+
+	public struct PingResult
+	{
+		public string Site;
+		public IPStatus Result;
+		public long Time;
 	}
 
 	public static class EnumExtentions
