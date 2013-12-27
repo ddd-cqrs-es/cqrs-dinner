@@ -89,6 +89,28 @@
 
 			query.Dump();
 		}
+
+
+		[Test]
+		public void Parallel_side_effect()
+		{
+			int i = 0;
+			var bad = from n in Enumerable.Range(0, 999).AsParallel() select n*i++;
+
+			var badResults = bad.ToArray();
+			foreach (var i1 in badResults)
+			{
+				Console.Write(i1 + " ");
+			}
+
+			var good = Enumerable.Range(0, 999).AsParallel().Select((n, j) => n*j);
+
+			var goodResults = good.ToArray();
+			foreach (var i1 in goodResults)
+			{
+				Console.Write(i1 + " ");
+			}
+		}
 	}
 
 	public static class EnumExtentions
@@ -138,5 +160,7 @@
 		public string Word;
 		public int Index;
 	}
+
+	
 
 }
