@@ -2,11 +2,13 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Diagnostics;
 	using System.IO;
 	using System.Linq;
 	using System.Net;
 	using System.Net.NetworkInformation;
 	using System.Reflection;
+	using System.Threading;
 	using NUnit.Framework;
 
 	[TestFixture]
@@ -129,6 +131,93 @@
 			query.Dump();
 
 			
+		}
+
+		[Test]
+		public void Cancel_with_break()
+		{
+			var million = Enumerable.Range(0, 1000000);
+			int count = 0;
+			var enumerable = million.AsParallel().Select(x =>
+				{
+					Thread.Sleep(10);
+					Interlocked.Increment(ref count);
+					return  x ;
+				});
+			
+			foreach (var i in enumerable)
+			{
+				if (i > 1000) break; //count should be 	
+			}
+
+			Console.WriteLine("Count is " + count);
+			
+			Assert.That(count, Is.GreaterThan(1010));
+			Assert.That(count, Is.LessThan(1050));
+		}
+
+		[Test]
+		public void Cancel_with_token()
+		{
+			var cancelSource = new CancellationTokenSource();
+			var mil = Enumerable.Range(3, 1000000);
+			var parallelQuery =
+				mil.AsParallel()
+				   .WithCancellation(cancelSource.Token)
+				   .Where(n => Enumerable.Range(2, (int) Math.Sqrt(n)).All(i => n % i > 0));
+
+			new Thread(() => {Thread.Sleep(100);
+			cancelSource.Cancel();}).Start();
+
+			var primes = new List<int>();
+			try
+			{
+				foreach (var prime in parallelQuery)
+				{
+					primes.Add(prime);
+				}
+			}
+			catch (OperationCanceledException)
+			{
+				Console.WriteLine("Query cancelled");
+			}
+			Console.WriteLine("Last prime is {0} at {1}", primes[primes.Count - 1], primes.Count);
+		
+		}
+
+		[Test]
+		public void NJustice_for_all()
+		{
+			"abcdefghijklmnopqrstuvwxyz".AsParallel().Select(c => char.ToUpper(c)).ForAll(Console.Write);
+		}
+
+		[Test]
+		public void Range_partitioning_is_slower_for_primes()
+		{
+			var mil = Enumerable.Range(3, 10000000);
+			var parallelQuery =
+				mil.AsParallel()
+				   .Where(n => Enumerable.Range(2, (int)Math.Sqrt(n)).All(i => n % i > 0));
+
+			var clock = new Stopwatch();
+			clock.Start();
+			parallelQuery.ToArray();
+			clock.Stop();
+
+			Console.WriteLine("Chunck partitioning took {0} ms", clock.ElapsedMilliseconds);
+
+			var milrange = Enumerable.Range(3, 10000000).ToArray();
+			var parallelRangeQuery =
+				milrange.AsParallel()
+				   .Where(n => Enumerable.Range(2, (int)Math.Sqrt(n)).All(i => n % i > 0));
+
+			clock.Reset();
+			clock.Start();
+			parallelRangeQuery.ToArray();
+			clock.Stop();
+
+			Console.WriteLine("Range partitioning took {0} ms", clock.ElapsedMilliseconds);
+
 		}
 	}
 
