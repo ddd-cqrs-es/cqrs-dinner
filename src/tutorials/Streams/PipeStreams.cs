@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.IO.Pipes;
 using System.Text;
@@ -71,14 +72,59 @@ namespace tutorials.Streams
 
         private void MessageServer()
         {
-            using (var s = new NamedPipeServerStream("pipedream", PipeDirection.InOut, 1, PipeTransmissionMode.Message))
+            using (var s = new NamedPipeServerStream("x-pipedream", PipeDirection.InOut, 1, PipeTransmissionMode.Message))
             {
                 s.WaitForConnection();
-                var msg = Encoding.UTF8.GetBytes("Hello");
-               
-                    s.Write(msg, 0, msg.Length);
-                
+                connected = true;
+                while (true)
+                {
+                    var msg = Encoding.UTF8.GetBytes("Hello" + i++);
+                    s.Write(msg, 0, msg.Length); //blocks until read?
+                }
             }
         }
+
+        int i = 0;
+        private bool connected;
+
+
+        [Test]
+        public void Server_blocks_if_no_reads()
+        {
+            new Thread(MessageServer).Start();
+
+            using (var p = new Process() {StartInfo = new ProcessStartInfo("NamedPipeClient.exe"){Arguments = "noread"}})
+            {
+                p.Start();
+
+                Thread.Sleep(TimeSpan.FromSeconds(10));
+
+                Assert.That(connected, Is.True);
+                Assert.That(i, Is.EqualTo(1));
+
+                p.Kill();
+            }
+        }
+
+        [Test]
+        public void Client_process_reads()
+        {
+            new Thread(MessageServer).Start();
+
+            using (var p = new Process() { StartInfo = new ProcessStartInfo("NamedPipeClient.exe"){Arguments = "read"} })
+            {
+                p.Start();
+
+                Thread.Sleep(TimeSpan.FromSeconds(10));
+
+                Assert.That(connected, Is.True);
+                Assert.That(i, Is.Not.EqualTo(1));
+
+                p.Kill();
+            }
+        }
+
+
+
     }
 }
