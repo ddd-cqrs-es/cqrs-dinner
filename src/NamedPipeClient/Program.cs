@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.MemoryMappedFiles;
 using System.IO.Pipes;
 using System.Linq;
 using System.Text;
@@ -38,7 +39,18 @@ namespace NamedPipeClient
                         Console.WriteLine(message);
                     }
                 }
+            }else if (mode == "mmf")
+            {
+                using (var mmf = MemoryMappedFile.OpenExisting("shared-memory"))
+                using (var accessor = mmf.CreateViewAccessor())
+                {
+                    var i = accessor.ReadInt32(0);
+
+                    Console.WriteLine(i);
+                    Thread.Sleep(100000);
+                }
             }
+
 
 
         }
