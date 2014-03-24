@@ -6,7 +6,6 @@ namespace JustOne
 
 		public void Bar()
 		{
-			//Says hi!
 			Console.Writeline("Bar says hi!");
 		}
 	}
