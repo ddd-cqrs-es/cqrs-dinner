@@ -35,7 +35,7 @@
       <HintPath>..\packages\EventStore.Client.1.1.0\lib\net40\EventStore.ClientAPI.dll</HintPath>
     </Reference>
     <Reference Include="nunit.framework">
-      <HintPath>..\..\lib\NUnit-2.5.10+11092\bin-net20\nunit.framework.dll</HintPath>
+      <HintPath>..\..\lib\NUnit\bin-net20\nunit.framework.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
