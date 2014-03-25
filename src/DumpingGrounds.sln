@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "stoploss-kata", "stoploss\stoploss-kata.csproj", "{6789651B-5E51-4792-BE51-4BC473231498}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tutorials", "tutorials\tutorials.csproj", "{B90F6DEA-4C75-49A2-BC53-D73AA1A80C06}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tutorials-tests", "tutorials-tests\tutorials-tests.csproj", "{B90F6DEA-4C75-49A2-BC53-D73AA1A80C06}"
 	ProjectSection(ProjectDependencies) = postProject
 		{E16F1D72-C4FD-4959-B583-5EFAC3C7641D} = {E16F1D72-C4FD-4959-B583-5EFAC3C7641D}
 		{AF9DFC85-4D40-444E-B499-53CF523E2004} = {AF9DFC85-4D40-444E-B499-53CF523E2004}

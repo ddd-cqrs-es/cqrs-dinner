@@ -42,7 +42,7 @@ namespace tutorials.Streams
             }
         }
 
-        [Test]
+        [Test][Timeout(2000)]
         public void Read_messages_from_pipe_server()
         {
             new Thread(MessageServer).Start();

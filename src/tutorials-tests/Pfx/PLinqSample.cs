@@ -17,7 +17,7 @@
 		[Test]
 		public void Simple_parallel_prime()
 		{
-			var numbers = Enumerable.Range(3, 100000 - 3);
+			var numbers = Enumerable.Range(3, 1000 - 3);
 			var parallelQuery = from n in numbers.AsParallel()
 			                    where Enumerable.Range(2, (int) Math.Sqrt(n)).All(i => n%i > 0)
 			                    select n;
