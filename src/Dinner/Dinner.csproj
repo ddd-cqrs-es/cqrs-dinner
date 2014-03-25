@@ -79,12 +79,6 @@
   <ItemGroup>
     <None Include="OrderDocument.json" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Garbage\Garbage.csproj">
-      <Project>{94179049-72A7-4AC6-B622-67CE9727FA66}</Project>
-      <Name>Garbage</Name>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
