@@ -1,4 +1,1 @@
-codekatas
-=========
-
-katas
+CQRS Dinner example from CQRS Advanced Class
