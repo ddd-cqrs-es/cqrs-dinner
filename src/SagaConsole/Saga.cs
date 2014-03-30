@@ -276,7 +276,7 @@
 
 		abstract class ActivityHost
 		{
-			Action<Uri, RoutingSlip> send;
+			System.Action<Uri, RoutingSlip> send;
 
 			public ActivityHost(Action<Uri, RoutingSlip> send)
 			{

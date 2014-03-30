@@ -32,7 +32,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="EventStore.ClientAPI">
-      <HintPath>..\packages\EventStore.Client.1.1.0\lib\net40\EventStore.ClientAPI.dll</HintPath>
+      <HintPath>..\..\lib\eventstore\mono\EventStore.ClientAPI.dll</HintPath>
     </Reference>
     <Reference Include="nunit.framework">
       <HintPath>..\..\lib\NUnit\bin-net20\nunit.framework.dll</HintPath>
